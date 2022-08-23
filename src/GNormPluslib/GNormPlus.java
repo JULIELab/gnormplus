@@ -21,6 +21,7 @@ import GNormPluslib.SR;
 
 public class GNormPlus
 {
+	@Deprecated
 	public static BioCDoc BioCDocobj = new BioCDoc();
 	public static PrefixTree PT_Species = new PrefixTree();
 	public static PrefixTree PT_Cell = new PrefixTree();
@@ -39,13 +40,13 @@ public class GNormPlus
 	public static HashMap<String, String> HomologeneID_hash = new HashMap<String, String>();
 	public static HashMap<String,String> SuffixTranslationMap_hash = new HashMap<String,String>();
 	public static HashMap<String,String> SuffixTranslationMap2_hash = new HashMap<String,String>();
-	public static HashMap<String, String> Pmid2Abb_hash = new HashMap<String, String>();
-	public static HashMap<String, String> PmidAbb2LF_lc_hash = new HashMap<String, String>();
-	public static HashMap<String, String> PmidLF2Abb_lc_hash = new HashMap<String, String>();
-	public static HashMap<String, String> PmidAbb2LF_hash = new HashMap<String, String>();
-	public static HashMap<String, String> PmidLF2Abb_hash = new HashMap<String, String>();
-	public static HashMap<String, String> Pmid2ChromosomeGene_hash = new HashMap<String, String>();
-	public static HashMap<String, String> SimConceptMention2Type_hash = new HashMap<String, String>();
+	@Deprecated public static HashMap<String, String> Pmid2Abb_hash = new HashMap<String, String>();
+	@Deprecated public static HashMap<String, String> PmidAbb2LF_lc_hash = new HashMap<String, String>();
+	@Deprecated public static HashMap<String, String> PmidLF2Abb_lc_hash = new HashMap<String, String>();
+	@Deprecated public static HashMap<String, String> PmidAbb2LF_hash = new HashMap<String, String>();
+	@Deprecated public static HashMap<String, String> PmidLF2Abb_hash = new HashMap<String, String>();
+	@Deprecated public static HashMap<String, String> Pmid2ChromosomeGene_hash = new HashMap<String, String>();
+	@Deprecated public static HashMap<String, String> SimConceptMention2Type_hash = new HashMap<String, String>();
 	public static HashMap<String, String> Filtering_hash = new HashMap<String, String>();
 	public static HashMap<String, String> Filtering_WithLongForm_hash = new HashMap<String, String>();
 	public static HashMap<String, String> SP_Virus2Human_hash = new HashMap<String, String>();
@@ -458,13 +459,15 @@ public class GNormPlus
 					}
 					else
 					{
-						BioCDocobj = new BioCDoc();
+						final GNPProcessingData data = new GNPProcessingData();
+//						BioCDocobj = new BioCDoc();
 						
 						/*
 						 * Format Check 
 						 */
 						String Format = "";
-						String checkR = BioCDocobj.BioCFormatCheck(InputFolder+"/"+InputFile);
+//						String checkR = BioCDocobj.BioCFormatCheck(InputFolder+"/"+InputFile);
+						String checkR = data.getBioCDocobj().BioCFormatCheck(InputFolder+"/"+InputFile);
 						if(checkR.equals("BioC"))
 						{
 							Format = "BioC";
@@ -487,7 +490,8 @@ public class GNormPlus
 						{
 							if(Format.equals("PubTator"))
 							{
-								BioCDocobj.PubTator2BioC(InputFolder+"/"+InputFile,"tmp/"+InputFile);
+//								BioCDocobj.PubTator2BioC(InputFolder+"/"+InputFile,"tmp/"+InputFile);
+								data.getBioCDocobj().PubTator2BioC(InputFolder+"/"+InputFile,"tmp/"+InputFile);
 								br = new BufferedReader(new FileReader("tmp/"+InputFile));
 								BufferedWriter fr = new BufferedWriter(new OutputStreamWriter(new FileOutputStream("tmp/"+InputFile+".GNR.xml"), "UTF-8"));
 								line="";
@@ -511,7 +515,8 @@ public class GNormPlus
 								fr.close();
 							}
 							GNR GNRobj = new GNR();
-							GNormPlus.BioCDocobj.BioCReaderWithAnnotation("tmp/"+InputFile+".GNR.xml");
+//							GNormPlus.BioCDocobj.BioCReaderWithAnnotation("tmp/"+InputFile+".GNR.xml");
+							data.getBioCDocobj().BioCReaderWithAnnotation("tmp/"+InputFile+".GNR.xml");
 							GNRobj.Ab3P("tmp/"+InputFile+".GNR.xml","tmp/"+InputFile+".Abb",TrainTest);
 						}
 						else
@@ -522,7 +527,8 @@ public class GNormPlus
 							{
 								if(Format.equals("PubTator"))
 								{
-									BioCDocobj.PubTator2BioC(InputFolder+"/"+InputFile,"tmp/"+InputFile);
+//									BioCDocobj.PubTator2BioC(InputFolder+"/"+InputFile,"tmp/"+InputFile);
+									data.getBioCDocobj().PubTator2BioC(InputFolder+"/"+InputFile,"tmp/"+InputFile);
 									GNRobj.LoadInputFile("tmp/"+InputFile,"tmp/"+InputFile+".Abb",TrainTest);
 								}
 								else if(Format.equals("BioC"))
@@ -544,7 +550,6 @@ public class GNormPlus
 									else if(Format.equals("BioC"))
 									{
 										GNRobj.ReadCRFresult(InputFolder+"/"+InputFile,"tmp/"+InputFile+".loca","tmp/"+InputFile+".output","tmp/"+InputFile+".GNR.xml",0.005,0.05); //0.005,0.05
-										System.out.println("And now: Post Processing");
 										GNRobj.PostProcessing(InputFolder+"/"+InputFile,"tmp/"+InputFile+".GNR.xml");
 									}
 								}
@@ -555,14 +560,14 @@ public class GNormPlus
 							{
 								if(Format.equals("PubTator"))
 								{
-									BioCDocobj.PubTator2BioC(InputFolder+"/"+InputFile,"tmp/"+InputFile);
+//									BioCDocobj.PubTator2BioC(InputFolder+"/"+InputFile,"tmp/"+InputFile);
+									data.getBioCDocobj().PubTator2BioC(InputFolder+"/"+InputFile,"tmp/"+InputFile);
 									GNRobj.LoadInputFile("tmp/"+InputFile,"tmp/"+InputFile+".Abb","Train");
 									GNRobj.PostProcessing("tmp/"+InputFile,"tmp/"+InputFile+".GNR.xml");
 								}
 								else if(Format.equals("BioC"))
 								{
 									GNRobj.LoadInputFile(InputFolder+"/"+InputFile,"tmp/"+InputFile+".Abb","Train");
-									System.out.println("And now: Post Processing mit IgnoreNER");
 									GNRobj.PostProcessing(InputFolder+"/"+InputFile,"tmp/"+InputFile+".GNR.xml");
 								}
 								
@@ -581,7 +586,8 @@ public class GNormPlus
 								SRobj.SpeciesRecognition("tmp/"+InputFile,"tmp/"+InputFile+".SR.xml",setup_hash.get("DictionaryFolder")+"/SPStrain.txt",setup_hash.get("FilterAntibody"));
 								if(setup_hash.containsKey("GeneSpeciesRecognitionOnly")  && setup_hash.get("GeneSpeciesRecognitionOnly").toLowerCase().equals("true") ) // GeneSpeciesRecognitionOnly
 								{
-									BioCDocobj.BioC2PubTator(InputFolder+"/"+InputFile,"tmp/"+InputFile+".SR.xml",OutputFolder+"/"+InputFile);
+//									BioCDocobj.BioC2PubTator(InputFolder+"/"+InputFile,"tmp/"+InputFile+".SR.xml",OutputFolder+"/"+InputFile);
+									data.getBioCDocobj().BioC2PubTator(InputFolder+"/"+InputFile,"tmp/"+InputFile+".SR.xml",OutputFolder+"/"+InputFile);
 								}
 							}
 							else
@@ -641,7 +647,8 @@ public class GNormPlus
 						{
 							if(Format.equals("PubTator"))
 							{
-								BioCDocobj.BioC2PubTator(InputFolder+"/"+InputFile,"tmp/"+InputFile+".SA.xml",OutputFolder+"/"+InputFile);
+//								BioCDocobj.BioC2PubTator(InputFolder+"/"+InputFile,"tmp/"+InputFile+".SA.xml",OutputFolder+"/"+InputFile);
+								data.getBioCDocobj().BioC2PubTator(InputFolder+"/"+InputFile,"tmp/"+InputFile+".SA.xml",OutputFolder+"/"+InputFile);
 							}
 							else
 							{
@@ -695,7 +702,8 @@ public class GNormPlus
 										{
 											GNobj.GeneNormalization("tmp/"+InputFile,"tmp/"+InputFile+".GN.xml",true);
 											GNobj.GeneIDRecognition("tmp/"+InputFile,"tmp/"+InputFile+".GN.xml");
-											BioCDocobj.BioC2PubTator("tmp/"+InputFile+".GN.xml",OutputFolder+"/"+InputFile);
+//											BioCDocobj.BioC2PubTator("tmp/"+InputFile+".GN.xml",OutputFolder+"/"+InputFile);
+											data.getBioCDocobj().BioC2PubTator("tmp/"+InputFile+".GN.xml",OutputFolder+"/"+InputFile);
 										}
 										else if(Format.equals("BioC"))
 										{
@@ -708,7 +716,8 @@ public class GNormPlus
 										if(Format.equals("PubTator"))
 										{
 											GNobj.GeneNormalization("tmp/"+InputFile,"tmp/"+InputFile+".GN.xml",false);
-											BioCDocobj.BioC2PubTator(InputFolder+"/"+InputFile,"tmp/"+InputFile+".GN.xml",OutputFolder+"/"+InputFile);
+//											BioCDocobj.BioC2PubTator(InputFolder+"/"+InputFile,"tmp/"+InputFile+".GN.xml",OutputFolder+"/"+InputFile);
+											data.getBioCDocobj().BioC2PubTator(InputFolder+"/"+InputFile,"tmp/"+InputFile+".GN.xml",OutputFolder+"/"+InputFile);
 										}
 										else if(Format.equals("BioC"))
 										{
