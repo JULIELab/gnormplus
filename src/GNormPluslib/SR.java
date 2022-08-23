@@ -385,9 +385,9 @@ public class SR
 			for(String men : Mention2ID_lc.keySet())
 			{
 				String men_id= Mention2ID_lc.get(men);
-				if(GNormPlus.PmidLF2Abb_lc_hash.containsKey(Pmid+"\t"+men))
+				if(data.getPmidLF2Abb_lc_hash().containsKey(Pmid+"\t"+men))
 				{
-					String Abb = GNormPlus.PmidLF2Abb_lc_hash.get(Pmid+"\t"+men);
+					String Abb = data.getPmidLF2Abb_lc_hash().get(Pmid+"\t"+men);
 					// Abbreviation
 					if(OtherNames.containsKey(men_id))
 					{
@@ -471,9 +471,9 @@ public class SR
 		        		String type = SpAnno[3];
 		        		
 		        		/** Abbreviation solution */
-		    			if(GNormPlus.PmidAbb2LF_lc_hash.containsKey(Pmid+"\t"+mention.toLowerCase()) && Mention2ID_lc.containsKey(GNormPlus.PmidAbb2LF_lc_hash.containsKey(Pmid+"\t"+mention.toLowerCase())))
+		    			if(data.getPmidAbb2LF_lc_hash().containsKey(Pmid+"\t"+mention.toLowerCase()) && Mention2ID_lc.containsKey(data.getPmidAbb2LF_lc_hash().containsKey(Pmid+"\t"+mention.toLowerCase())))
 						{
-							String LF_lc=GNormPlus.PmidAbb2LF_lc_hash.get(Pmid+"\t"+mention.toLowerCase());
+							String LF_lc=data.getPmidAbb2LF_lc_hash().get(Pmid+"\t"+mention.toLowerCase());
 							if(Mention2ID_lc.containsKey(LF_lc))
 							{
 								String LF_ID=Mention2ID_lc.get(LF_lc);

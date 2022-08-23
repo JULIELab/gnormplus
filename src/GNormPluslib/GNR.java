@@ -96,14 +96,14 @@ public class GNR
 				String SF = mtmp.group(1);
 				String LF = mtmp.group(2);
 				double weight=  Double.parseDouble(mtmp.group(3));
-				GNormPlus.Pmid2Abb_hash.put(pmid+"\t"+SF, "Abb:SF");
-				GNormPlus.Pmid2Abb_hash.put(pmid+"\t"+LF, "Abb:LF");
-				GNormPlus.PmidLF2Abb_lc_hash.put(pmid+"\t"+LF.toLowerCase(), SF.toLowerCase());
-				GNormPlus.PmidAbb2LF_lc_hash.put(pmid+"\t"+SF.toLowerCase(), LF.toLowerCase());
-				GNormPlus.PmidAbb2LF_hash.put(pmid+"\t"+SF, LF);
+				data.getPmid2Abb_hash().put(pmid+"\t"+SF, "Abb:SF");
+				data.getPmid2Abb_hash().put(pmid+"\t"+LF, "Abb:LF");
+				data.getPmidLF2Abb_lc_hash().put(pmid+"\t"+LF.toLowerCase(), SF.toLowerCase());
+				data.getPmidAbb2LF_lc_hash().put(pmid+"\t"+SF.toLowerCase(), LF.toLowerCase());
+				data.getPmidAbb2LF_hash().put(pmid+"\t"+SF, LF);
 				if(weight >= 0.9)
 				{
-					GNormPlus.PmidLF2Abb_hash.put(pmid+"\t"+LF, SF);
+					data.getPmidLF2Abb_hash().put(pmid+"\t"+LF, SF);
 				}
 			}
 		}
@@ -198,14 +198,14 @@ public class GNR
 				String SF = mtmp.group(1);
 				String LF = mtmp.group(2);
 				double weight=  Double.parseDouble(mtmp.group(3));
-				GNormPlus.Pmid2Abb_hash.put(pmid+"\t"+SF, "Abb:SF");
-				GNormPlus.Pmid2Abb_hash.put(pmid+"\t"+LF, "Abb:LF");
-				GNormPlus.PmidLF2Abb_lc_hash.put(pmid+"\t"+LF.toLowerCase(), SF.toLowerCase());
-				GNormPlus.PmidAbb2LF_lc_hash.put(pmid+"\t"+SF.toLowerCase(), LF.toLowerCase());
-				GNormPlus.PmidAbb2LF_hash.put(pmid+"\t"+SF, LF);
+				data.getPmid2Abb_hash().put(pmid+"\t"+SF, "Abb:SF");
+				data.getPmid2Abb_hash().put(pmid+"\t"+LF, "Abb:LF");
+				data.getPmidLF2Abb_lc_hash().put(pmid+"\t"+LF.toLowerCase(), SF.toLowerCase());
+				data.getPmidAbb2LF_lc_hash().put(pmid+"\t"+SF.toLowerCase(), LF.toLowerCase());
+				data.getPmidAbb2LF_hash().put(pmid+"\t"+SF, LF);
 				if(weight >= 0.9)
 				{
-					GNormPlus.PmidLF2Abb_hash.put(pmid+"\t"+LF, SF);
+					data.getPmidLF2Abb_hash().put(pmid+"\t"+LF, SF);
 				}
 			}
 		}
@@ -246,7 +246,7 @@ public class GNR
 					HashMap<Integer, String> Abb_sortebylength = new HashMap<Integer, String>();
 					ArrayList<Integer> length_list = new ArrayList<Integer>();
 					int countn=0;
-					for (Object key : GNormPlus.Pmid2Abb_hash.keySet())
+					for (Object key : data.getPmid2Abb_hash().keySet())
 					{
 						String pmid2abb[]=key.toString().split("\t");
 						if(Pmid.equals(pmid2abb[0]))
@@ -271,7 +271,7 @@ public class GNR
 							String str3=mtmp.group(3);
 							for(int m=str1.length();m<=(str1.length()+str2.length());m++)
     						{
-								Abbreviation_hash.put((m-1),GNormPlus.Pmid2Abb_hash.get(Pmid+"\t"+Abb_sortebylength.get(length_list.get(l))));
+								Abbreviation_hash.put((m-1),data.getPmid2Abb_hash().get(Pmid+"\t"+Abb_sortebylength.get(length_list.get(l))));
 							}
 							String men="";
 							for(int m=0;m<str2.length();m++){men=men+"@";}
@@ -1272,33 +1272,33 @@ public class GNR
 						if(MentionType2Num.containsKey(mention+"\t"+type))
 						{
 							MentionType2Num.put(mention.toLowerCase()+"\t"+type,MentionType2Num.get(mention+"\t"+type)+1);
-							if( GNormPlus.PmidLF2Abb_lc_hash.containsKey(pmid+"\t"+mention.toLowerCase()) )
+							if( data.getPmidLF2Abb_lc_hash().containsKey(pmid+"\t"+mention.toLowerCase()) )
 							{
-								MentionType2Num.put(GNormPlus.PmidLF2Abb_lc_hash.get(pmid+"\t"+mention.toLowerCase())+"\t"+type,MentionType2Num.get(mention+"\t"+type)+1);
+								MentionType2Num.put(data.getPmidLF2Abb_lc_hash().get(pmid+"\t"+mention.toLowerCase())+"\t"+type,MentionType2Num.get(mention+"\t"+type)+1);
 							}
 							else
 							{
-								MentionType2Num.put(GNormPlus.PmidLF2Abb_lc_hash.get(pmid+"\t"+mention.toLowerCase())+"\t"+type,1);
+								MentionType2Num.put(data.getPmidLF2Abb_lc_hash().get(pmid+"\t"+mention.toLowerCase())+"\t"+type,1);
 							}
-							if( GNormPlus.PmidAbb2LF_lc_hash.containsKey(pmid+"\t"+mention.toLowerCase()) )
+							if( data.getPmidAbb2LF_lc_hash().containsKey(pmid+"\t"+mention.toLowerCase()) )
 							{
-								MentionType2Num.put(GNormPlus.PmidAbb2LF_lc_hash.get(pmid+"\t"+mention.toLowerCase())+"\t"+type,MentionType2Num.get(mention+"\t"+type)+1);
+								MentionType2Num.put(data.getPmidAbb2LF_lc_hash().get(pmid+"\t"+mention.toLowerCase())+"\t"+type,MentionType2Num.get(mention+"\t"+type)+1);
 							}
 							else
 							{
-								MentionType2Num.put(GNormPlus.PmidAbb2LF_lc_hash.get(pmid+"\t"+mention.toLowerCase())+"\t"+type,1);
+								MentionType2Num.put(data.getPmidAbb2LF_lc_hash().get(pmid+"\t"+mention.toLowerCase())+"\t"+type,1);
 							}
 						}
 						else
 						{
 							MentionType2Num.put(mention.toLowerCase()+"\t"+type,1);
-							if( GNormPlus.PmidLF2Abb_lc_hash.containsKey(pmid+"\t"+mention.toLowerCase()) )
+							if( data.getPmidLF2Abb_lc_hash().containsKey(pmid+"\t"+mention.toLowerCase()) )
 							{
-								MentionType2Num.put(GNormPlus.PmidLF2Abb_lc_hash.get(pmid+"\t"+mention.toLowerCase())+"\t"+type,1);
+								MentionType2Num.put(data.getPmidLF2Abb_lc_hash().get(pmid+"\t"+mention.toLowerCase())+"\t"+type,1);
 							}
-							if( GNormPlus.PmidAbb2LF_lc_hash.containsKey(pmid+"\t"+mention.toLowerCase()) )
+							if( data.getPmidAbb2LF_lc_hash().containsKey(pmid+"\t"+mention.toLowerCase()) )
 							{
-								MentionType2Num.put(GNormPlus.PmidAbb2LF_lc_hash.get(pmid+"\t"+mention.toLowerCase())+"\t"+type,1);
+								MentionType2Num.put(data.getPmidAbb2LF_lc_hash().get(pmid+"\t"+mention.toLowerCase())+"\t"+type,1);
 							}
 						}
 						if(Anno[3].equals("Gene")) //Anno[3] is type
@@ -1345,13 +1345,13 @@ public class GNR
 							if((!men.equals(mention.toLowerCase())) && men.matches(mention_tmp+"[\\W\\-\\_]*("+Strain_Suffix+")"))
 							{
 								data.getBioCDocobj().Annotations.get(i).get(j).set(k, start+"\t"+last+"\t"+mention+"\tFamilyName");
-								if(GNormPlus.PmidLF2Abb_lc_hash.containsKey(data.getBioCDocobj().PMIDs.get(i)+"\t"+mention.toLowerCase()))
+								if(data.getPmidLF2Abb_lc_hash().containsKey(data.getBioCDocobj().PMIDs.get(i)+"\t"+mention.toLowerCase()))
 								{
-									Translate2Family.add(GNormPlus.PmidLF2Abb_lc_hash.get(data.getBioCDocobj().PMIDs.get(i)+"\t"+mention.toLowerCase()));
+									Translate2Family.add(data.getPmidLF2Abb_lc_hash().get(data.getBioCDocobj().PMIDs.get(i)+"\t"+mention.toLowerCase()));
 								}
-								else if(GNormPlus.PmidAbb2LF_lc_hash.containsKey(data.getBioCDocobj().PMIDs.get(i)+"\t"+mention.toLowerCase()))
+								else if(data.getPmidAbb2LF_lc_hash().containsKey(data.getBioCDocobj().PMIDs.get(i)+"\t"+mention.toLowerCase()))
 								{
-									Translate2Family.add(GNormPlus.PmidAbb2LF_lc_hash.get(data.getBioCDocobj().PMIDs.get(i)+"\t"+mention.toLowerCase()));
+									Translate2Family.add(data.getPmidAbb2LF_lc_hash().get(data.getBioCDocobj().PMIDs.get(i)+"\t"+mention.toLowerCase()));
 								}
 								SubSt=true;
 								break;
@@ -1436,29 +1436,29 @@ public class GNR
 							 *   - LF only : LF.type -> Abb.type
 							 */
 							String lc_ment=mention.toLowerCase();
-							if(GNormPlus.PmidAbb2LF_lc_hash.containsKey(pmid+"\t"+lc_ment)) //the target mention is abbreviation
+							if(data.getPmidAbb2LF_lc_hash().containsKey(pmid+"\t"+lc_ment)) //the target mention is abbreviation
 							{
 								//Infer Abbreviation by Long form
-								if(GNormPlus.PmidAbb2LF_lc_hash.get(pmid+"\t"+lc_ment).matches(".*("+Disease_Suffix+")"))
+								if(data.getPmidAbb2LF_lc_hash().get(pmid+"\t"+lc_ment).matches(".*("+Disease_Suffix+")"))
 								{
 									//remove the mention (Abb), because the LF is a disease 
 								}
-								else if(GNormPlus.PmidAbb2LF_lc_hash.get(pmid+"\t"+lc_ment).matches(".*("+Cell_Suffix+")"))
+								else if(data.getPmidAbb2LF_lc_hash().get(pmid+"\t"+lc_ment).matches(".*("+Cell_Suffix+")"))
 								{
 									//data.getBioCDocobj().Annotations.get(i).get(j).set(k, Anno[0]+"\t"+Anno[1]+"\tCell");
 								}
-								else if(GNormPlus.PmidAbb2LF_lc_hash.get(pmid+"\t"+lc_ment).matches(".*("+FamilyName_Suffix+")") && !lc_ment.matches(".+[a-z][0-9][a-z]")) //AtRPA1a in pmid:19153602
+								else if(data.getPmidAbb2LF_lc_hash().get(pmid+"\t"+lc_ment).matches(".*("+FamilyName_Suffix+")") && !lc_ment.matches(".+[a-z][0-9][a-z]")) //AtRPA1a in pmid:19153602
 								{
 									data.getBioCDocobj().Annotations.get(i).get(j).set(k, start+"\t"+last+"\t"+mention+"\tFamilyName");
 								}
-								else if(GNormPlus.PmidAbb2LF_lc_hash.get(pmid+"\t"+lc_ment).matches(".*("+DomainMotif_Suffix+")"))
+								else if(data.getPmidAbb2LF_lc_hash().get(pmid+"\t"+lc_ment).matches(".*("+DomainMotif_Suffix+")"))
 								{
 									data.getBioCDocobj().Annotations.get(i).get(j).set(k, start+"\t"+last+"\t"+mention+"\tDomainMotif");
 								}
 								else
 								{
-									if(Mention2Type_Hash.containsKey(GNormPlus.PmidAbb2LF_lc_hash.get(pmid+"\t"+lc_ment)) 
-									&& Mention2Type_Hash.get(GNormPlus.PmidAbb2LF_lc_hash.get(pmid+"\t"+lc_ment)).equals("Gene")
+									if(Mention2Type_Hash.containsKey(data.getPmidAbb2LF_lc_hash().get(pmid+"\t"+lc_ment)) 
+									&& Mention2Type_Hash.get(data.getPmidAbb2LF_lc_hash().get(pmid+"\t"+lc_ment)).equals("Gene")
 									&& !(type.equals("Gene"))
 									) // if Long Form is recognized as a Gene, and Abb is recognized as not a Gene
 									{
