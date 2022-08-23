@@ -81,39 +81,8 @@ public class GNormPlus
 				FocusSpecies=args[3];
 			}
 		}
-		
-		BufferedReader br = new BufferedReader(new FileReader(SetupFile));
-		String line="";
-		Pattern ptmp = Pattern.compile("^	([A-Za-z0-9]+) = ([^ \\t\\n\\r]+)$");
-		while ((line = br.readLine()) != null)  
-		{
-			Matcher mtmp = ptmp.matcher(line);
-			if(mtmp.find())
-			{
-				setup_hash.put(mtmp.group(1), mtmp.group(2));
-			}
-		}
-		br.close();
-		if(!setup_hash.containsKey("GeneIDMatch"))
-		{
-			setup_hash.put("GeneIDMatch","True");
-		}
-		if(!setup_hash.containsKey("HomologeneID"))
-		{
-			setup_hash.put("HomologeneID","False");
-		}
-		if(!FocusSpecies.equals(""))
-		{
-			setup_hash.put("FocusSpecies",FocusSpecies);
-		}
-		if((setup_hash.get("SpeciesAssignmentOnly").equals("True")) || (setup_hash.get("GeneNormalizationOnly").equals("True")))
-		{
-			setup_hash.put("IgnoreNER","True");
-		}
-		if(!setup_hash.containsKey("ShowUnNormalizedMention"))
-		{
-			setup_hash.put("ShowUnNormalizedMention","False");
-		}
+
+		loadConfiguration(FocusSpecies);
 		/*
 		 * Time stamp - start : All
 		 */
@@ -143,301 +112,8 @@ public class GNormPlus
 
 		if(NumFiles>0)
 		{
-			/* 
-			 * Start & Load Dictionary
-			 */
-			String TrainTest = "Test";
-			if(setup_hash.containsKey("TrainTest"))
-			{
-				TrainTest = setup_hash.get("TrainTest");
-			}
-			
-			System.out.print("Loading Gene/Species Dictionary : Processing ... \r");
-			/** Load Dictionary */
-			{
-				/** GeneWithoutSPPrefix */
-				br = new BufferedReader(new FileReader(setup_hash.get("DictionaryFolder")+"/GeneWithoutSPPrefix.txt"));
-				line="";
-				while ((line = br.readLine()) != null)  
-				{
-					GeneWithoutSPPrefix_hash.put(line, "");
-				}
-				br.close();	
-				
-				/** CTDGene  */
-				if(setup_hash.containsKey("IgnoreNER") && setup_hash.get("IgnoreNER").toLowerCase().equals("true")){} // not NER (entities are pre-annotated)
-				else if(setup_hash.containsKey("SpeciesAssignmentOnly") && setup_hash.get("SpeciesAssignmentOnly").toLowerCase().equals("true")) {} // species assignment 
-				else
-				{
-					PT_CTDGene.TreeFile2Tree(setup_hash.get("DictionaryFolder")+"/PT_CTDGene.txt");
-				}
-				/** ent */
-				br = new BufferedReader(new FileReader(setup_hash.get("DictionaryFolder")+"/ent.rev.txt"));
-				line="";
-				while ((line = br.readLine()) != null)  
-				{
-					String l[]=line.split("\t"); //&#x00391;	Alpha
-					ent_hash.put(l[0], l[1]);
-				}
-				br.close();	
-	
-				/** FamilyName */
-				if((!setup_hash.containsKey("IgnoreNER")) || setup_hash.get("IgnoreNER").toLowerCase() != "true")
-				{
-					PT_FamilyName.TreeFile2Tree(setup_hash.get("DictionaryFolder")+"/PT_FamilyName.txt");
-				}
-				
-				/** Species */
-				PT_Species.TreeFile2Tree(setup_hash.get("DictionaryFolder")+"/PT_Species.txt");
+			String TrainTest = loadResources(FocusSpecies, startTime);
 
-				/** Cell */
-				PT_Cell.TreeFile2Tree(setup_hash.get("DictionaryFolder")+"/PT_Cell.txt");
-				
-				/** Genus */
-				br = new BufferedReader(new FileReader(setup_hash.get("DictionaryFolder")+"/SPGenus.txt"));
-				line="";
-				while ((line = br.readLine()) != null)  
-				{
-					String l[]=line.split("\t");
-					GenusID_hash.put(l[0], l[1]); // tax id -> Genus
-				}
-				br.close();	
-				
-				/** taxid4gene */
-				br = new BufferedReader(new FileReader(setup_hash.get("DictionaryFolder")+"/tax4gene.txt"));
-				line="";
-				while ((line = br.readLine()) != null)  
-				{
-					taxid4gene.add(line); // tax id -> Genus
-				}
-				br.close();	
-				
-				/** gene_prefix & gene_suffix */
-				br = new BufferedReader(new FileReader(setup_hash.get("DictionaryFolder")+"/PrefixSuffix.txt"));
-				line="";
-				while ((line = br.readLine()) != null)  
-				{
-					String l[]=line.split("\t");
-					String org=l[0];
-					String mod=l[1];
-					suffixprefix_orig2modified.put(org,mod);
-				}
-				br.close();	
-				
-				/** gene_prefix & gene_suffix */
-				br = new BufferedReader(new FileReader(setup_hash.get("DictionaryFolder")+"/NonGeneAbbr.txt"));
-				line="";
-				while ((line = br.readLine()) != null)  
-				{
-					String l[]=line.split("\t");
-					String shortform=l[0];
-					String longform_toks=l[1];
-					Abb2Longformtok_hash.put(shortform,longform_toks);
-				}
-				br.close();
-																								
-				/** Prefix */
-				br = new BufferedReader(new FileReader(setup_hash.get("DictionaryFolder")+"/SPPrefix.txt"));
-				line="";
-				while ((line = br.readLine()) != null)  
-				{
-					String l[]=line.split("\t");
-					PrefixID_hash.put(l[0], l[1]); //tax id -> prefix
-				}
-				br.close();
-				PrefixID_hash.put("9606", "h");
-				PrefixID_hash.put("10090", "m");
-				PrefixID_hash.put("10116", "r");
-				PrefixID_hash.put("4932", "y");
-				PrefixID_hash.put("7227", "d");
-				PrefixID_hash.put("7955", "z|dr|Dr|Zf|zf");
-				PrefixID_hash.put("3702", "at|At");
-				
-				/** Frequency */
-				br = new BufferedReader(new FileReader(setup_hash.get("DictionaryFolder")+"/taxonomy_freq.txt"));
-				line="";
-				while ((line = br.readLine()) != null)  
-				{
-					String l[]=line.split("\t");
-					TaxFreq_hash.put(l[0], Double.parseDouble(l[1])/200000000); //tax id -> prefix
-				}
-				br.close();	
-				
-				/** SP_Virus2Human_hash */
-				br = new BufferedReader(new FileReader(setup_hash.get("DictionaryFolder")+"/SP_Virus2HumanList.txt"));
-				line="";
-				while ((line = br.readLine()) != null)  
-				{
-					SP_Virus2Human_hash.put(line,"9606");
-				}
-				br.close();	
-	
-				/** SimConcept.MentionType */
-				br = new BufferedReader(new FileReader(setup_hash.get("DictionaryFolder")+"/SimConcept.MentionType.txt"));
-				line="";
-				while ((line = br.readLine()) != null)  
-				{
-					String l[]=line.split("\t");
-					SimConceptMention2Type_hash.put(l[0], l[1]);
-				}
-				br.close();	
-				
-				/** Filtering */
-				br = new BufferedReader(new FileReader(setup_hash.get("DictionaryFolder")+"/Filtering.txt"));
-				line="";
-				while ((line = br.readLine()) != null)  
-				{
-					Filtering_hash.put(line, "");
-				}
-				br.close();	
-				/** Filtering_WithLongForm.txt */
-				br = new BufferedReader(new FileReader(setup_hash.get("DictionaryFolder")+"/Filtering_WithLongForm.txt"));
-				line="";
-				while ((line = br.readLine()) != null)  
-				{
-					String l[]=line.split("\t");
-					Filtering_WithLongForm_hash.put(l[0], l[1]);
-				}
-				br.close();	
-					
-				/** SPStrain */
-				br = new BufferedReader(new FileReader(setup_hash.get("DictionaryFolder")+"/SPStrain.txt"));
-				line="";
-				while ((line = br.readLine()) != null)  
-				{
-					String l[]=line.split("\t");
-					String ancestor_id = l[0];
-					String tax_id = l[1];
-					String tax_names = l[2];
-					StrainID_ancestor2tax_hash.put(ancestor_id, tax_id); // ancestor -> tax_id
-					StrainID_taxid2names_hash.put(tax_id, tax_names); // tax id -> strain
-				}
-				br.close();
-				
-				if((!setup_hash.containsKey("IgnoreNER")) || setup_hash.get("IgnoreNER").toLowerCase() != "true")
-				{
-					/** Gene */
-					if(setup_hash.containsKey("FocusSpecies") && !setup_hash.get("FocusSpecies").equals("All"))
-					{
-						PT_Gene.TreeFile2Tree(setup_hash.get("DictionaryFolder")+"/PT_Gene."+setup_hash.get("FocusSpecies")+".txt");
-					}
-					else if((!FocusSpecies.equals("")) && (!FocusSpecies.equals("All")))
-					{
-						PT_Gene.TreeFile2Tree(setup_hash.get("DictionaryFolder")+"/PT_Gene."+FocusSpecies+".txt");
-					}
-					else
-					{
-						PT_Gene.TreeFile2Tree(setup_hash.get("DictionaryFolder")+"/PT_Gene.txt");
-					}
-				
-					/** GeneScoring */
-					String FileName=setup_hash.get("DictionaryFolder")+"/GeneScoring.txt";
-					
-					if(setup_hash.containsKey("FocusSpecies") && !setup_hash.get("FocusSpecies").equals("All"))
-					{
-						FileName = setup_hash.get("DictionaryFolder")+"/GeneScoring."+setup_hash.get("FocusSpecies")+".txt";
-					}
-					else if((!FocusSpecies.equals("")) && (!FocusSpecies.equals("All")))
-					{
-						FileName = setup_hash.get("DictionaryFolder")+"/GeneScoring."+FocusSpecies+".txt";
-					}
-					br = new BufferedReader(new FileReader(FileName));
-					line="";
-					while ((line = br.readLine()) != null)  
-					{
-						String l[]=line.split("\t");
-						GeneScoring_hash.put(l[0], l[1]+"\t"+l[2]+"\t"+l[3]+"\t"+l[4]+"\t"+l[5]+"\t"+l[6]);
-					}
-					br.close();	
-					
-					/** GeneScoring.DF */
-					FileName=setup_hash.get("DictionaryFolder")+"/GeneScoring.DF.txt";
-					if(setup_hash.containsKey("FocusSpecies") && !setup_hash.get("FocusSpecies").equals("All"))
-					{
-						FileName = setup_hash.get("DictionaryFolder")+"/GeneScoring.DF."+setup_hash.get("FocusSpecies")+".txt";
-					}
-					else if((!FocusSpecies.equals("")) && (!FocusSpecies.equals("All")))
-					{
-						FileName = setup_hash.get("DictionaryFolder")+"/GeneScoring.DF."+FocusSpecies+".txt";
-					}
-					br = new BufferedReader(new FileReader(FileName));
-					double Sum = Double.parseDouble(br.readLine());
-					while ((line = br.readLine()) != null)  
-					{
-						String l[]=line.split("\t");
-						// token -> idf
-						GeneScoringDF_hash.put(l[0], Math.log10(Sum/Double.parseDouble(l[1])));
-					}
-					br.close();
-				}
-				
-				/** Suffix Translation */
-				SuffixTranslationMap_hash.put("alpha","a");
-				SuffixTranslationMap_hash.put("a","alpha");
-				SuffixTranslationMap_hash.put("beta","b");
-				SuffixTranslationMap_hash.put("b","beta");
-				SuffixTranslationMap_hash.put("delta","d");
-				SuffixTranslationMap_hash.put("d","delta");
-				SuffixTranslationMap_hash.put("z","zeta");
-				SuffixTranslationMap_hash.put("zeta","z");
-				SuffixTranslationMap_hash.put("gamma","g");
-				SuffixTranslationMap_hash.put("g","gamma");
-				SuffixTranslationMap_hash.put("r","gamma");
-				SuffixTranslationMap_hash.put("y","gamma");
-				
-				SuffixTranslationMap2_hash.put("2","ii");
-				SuffixTranslationMap2_hash.put("ii","2");
-				SuffixTranslationMap2_hash.put("II","2");
-				SuffixTranslationMap2_hash.put("1","i");
-				SuffixTranslationMap2_hash.put("i","1");
-				SuffixTranslationMap2_hash.put("I","1");
-				
-				/** GeneID */
-				if(setup_hash.containsKey("GeneIDMatch") && setup_hash.get("GeneIDMatch").toLowerCase().equals("true"))
-				{
-					br = new BufferedReader(new FileReader(setup_hash.get("DictionaryFolder")+"/GeneIDs.txt"));
-					line="";
-					while ((line = br.readLine()) != null)  
-					{
-						String l[]=line.split("\t");
-						GeneIDs_hash.put(l[0],l[1]);
-					}
-					br.close();
-				}
-				
-				/** Normalization2Protein */
-				if(setup_hash.containsKey("Normalization2Protein") && setup_hash.get("Normalization2Protein").toLowerCase().equals("true"))
-				{
-					br = new BufferedReader(new FileReader(setup_hash.get("DictionaryFolder")+"/Gene2Protein.txt"));
-					line="";
-					while ((line = br.readLine()) != null)  
-					{
-						String l[]=line.split("\t");
-						Normalization2Protein_hash.put(l[0],l[1]);
-					}
-					br.close();
-				}
-				
-				/** HomologeneID */
-				if(setup_hash.containsKey("HomologeneID") && setup_hash.get("HomologeneID").toLowerCase().equals("true"))
-				{
-					br = new BufferedReader(new FileReader(setup_hash.get("DictionaryFolder")+"/Gene2Homoid.txt"));
-					line="";
-					while ((line = br.readLine()) != null)  
-					{
-						String l[]=line.split("\t");
-						HomologeneID_hash.put(l[0],l[1]);
-					}
-					br.close();
-				}
-				
-				/** GeneChromosome */
-				//PT_GeneChromosome.TreeFile2Tree(setup_hash.get("DictionaryFolder")+"/PT_GeneChromosome.txt");
-			}
-			endTime = System.currentTimeMillis();
-			totTime = endTime - startTime;
-			System.out.println("Loading Gene Dictionary : Processing Time:"+totTime/1000+"sec");
-			
 			folder = new File(InputFolder);
 			listOfFiles = folder.listFiles();
 			for (int i = 0; i < listOfFiles.length; i++)
@@ -461,6 +137,343 @@ public class GNormPlus
 				}
 			}
 		}
+	}
+
+	private static void loadConfiguration(String FocusSpecies) throws IOException {
+		BufferedReader br = new BufferedReader(new FileReader(SetupFile));
+		String line="";
+		Pattern ptmp = Pattern.compile("^	([A-Za-z0-9]+) = ([^ \\t\\n\\r]+)$");
+		while ((line = br.readLine()) != null)
+		{
+			Matcher mtmp = ptmp.matcher(line);
+			if(mtmp.find())
+			{
+				setup_hash.put(mtmp.group(1), mtmp.group(2));
+			}
+		}
+		br.close();
+		if(!setup_hash.containsKey("GeneIDMatch"))
+		{
+			setup_hash.put("GeneIDMatch","True");
+		}
+		if(!setup_hash.containsKey("HomologeneID"))
+		{
+			setup_hash.put("HomologeneID","False");
+		}
+		if(!FocusSpecies.equals(""))
+		{
+			setup_hash.put("FocusSpecies", FocusSpecies);
+		}
+		if((setup_hash.get("SpeciesAssignmentOnly").equals("True")) || (setup_hash.get("GeneNormalizationOnly").equals("True")))
+		{
+			setup_hash.put("IgnoreNER","True");
+		}
+		if(!setup_hash.containsKey("ShowUnNormalizedMention"))
+		{
+			setup_hash.put("ShowUnNormalizedMention","False");
+		}
+	}
+
+	private static String loadResources(String FocusSpecies, double startTime) throws IOException {
+		double endTime;
+		double totTime;
+		String line;
+		BufferedReader br;
+		/*
+		 * Start & Load Dictionary
+		 */
+		String TrainTest = "Test";
+		if(setup_hash.containsKey("TrainTest"))
+		{
+			TrainTest = setup_hash.get("TrainTest");
+		}
+
+		System.out.print("Loading Gene/Species Dictionary : Processing ... \r");
+		/** Load Dictionary */
+		{
+			/** GeneWithoutSPPrefix */
+			br = new BufferedReader(new FileReader(setup_hash.get("DictionaryFolder")+"/GeneWithoutSPPrefix.txt"));
+			line="";
+			while ((line = br.readLine()) != null)
+			{
+				GeneWithoutSPPrefix_hash.put(line, "");
+			}
+			br.close();
+
+			/** CTDGene  */
+			if(setup_hash.containsKey("IgnoreNER") && setup_hash.get("IgnoreNER").toLowerCase().equals("true")){} // not NER (entities are pre-annotated)
+			else if(setup_hash.containsKey("SpeciesAssignmentOnly") && setup_hash.get("SpeciesAssignmentOnly").toLowerCase().equals("true")) {} // species assignment
+			else
+			{
+				PT_CTDGene.TreeFile2Tree(setup_hash.get("DictionaryFolder")+"/PT_CTDGene.txt");
+			}
+			/** ent */
+			br = new BufferedReader(new FileReader(setup_hash.get("DictionaryFolder")+"/ent.rev.txt"));
+			line="";
+			while ((line = br.readLine()) != null)
+			{
+				String l[]=line.split("\t"); //&#x00391;	Alpha
+				ent_hash.put(l[0], l[1]);
+			}
+			br.close();
+
+			/** FamilyName */
+			if((!setup_hash.containsKey("IgnoreNER")) || setup_hash.get("IgnoreNER").toLowerCase() != "true")
+			{
+				PT_FamilyName.TreeFile2Tree(setup_hash.get("DictionaryFolder")+"/PT_FamilyName.txt");
+			}
+
+			/** Species */
+			PT_Species.TreeFile2Tree(setup_hash.get("DictionaryFolder")+"/PT_Species.txt");
+
+			/** Cell */
+			PT_Cell.TreeFile2Tree(setup_hash.get("DictionaryFolder")+"/PT_Cell.txt");
+
+			/** Genus */
+			br = new BufferedReader(new FileReader(setup_hash.get("DictionaryFolder")+"/SPGenus.txt"));
+			line="";
+			while ((line = br.readLine()) != null)
+			{
+				String l[]=line.split("\t");
+				GenusID_hash.put(l[0], l[1]); // tax id -> Genus
+			}
+			br.close();
+
+			/** taxid4gene */
+			br = new BufferedReader(new FileReader(setup_hash.get("DictionaryFolder")+"/tax4gene.txt"));
+			line="";
+			while ((line = br.readLine()) != null)
+			{
+				taxid4gene.add(line); // tax id -> Genus
+			}
+			br.close();
+
+			/** gene_prefix & gene_suffix */
+			br = new BufferedReader(new FileReader(setup_hash.get("DictionaryFolder")+"/PrefixSuffix.txt"));
+			line="";
+			while ((line = br.readLine()) != null)
+			{
+				String l[]=line.split("\t");
+				String org=l[0];
+				String mod=l[1];
+				suffixprefix_orig2modified.put(org,mod);
+			}
+			br.close();
+
+			/** gene_prefix & gene_suffix */
+			br = new BufferedReader(new FileReader(setup_hash.get("DictionaryFolder")+"/NonGeneAbbr.txt"));
+			line="";
+			while ((line = br.readLine()) != null)
+			{
+				String l[]=line.split("\t");
+				String shortform=l[0];
+				String longform_toks=l[1];
+				Abb2Longformtok_hash.put(shortform,longform_toks);
+			}
+			br.close();
+
+			/** Prefix */
+			br = new BufferedReader(new FileReader(setup_hash.get("DictionaryFolder")+"/SPPrefix.txt"));
+			line="";
+			while ((line = br.readLine()) != null)
+			{
+				String l[]=line.split("\t");
+				PrefixID_hash.put(l[0], l[1]); //tax id -> prefix
+			}
+			br.close();
+			PrefixID_hash.put("9606", "h");
+			PrefixID_hash.put("10090", "m");
+			PrefixID_hash.put("10116", "r");
+			PrefixID_hash.put("4932", "y");
+			PrefixID_hash.put("7227", "d");
+			PrefixID_hash.put("7955", "z|dr|Dr|Zf|zf");
+			PrefixID_hash.put("3702", "at|At");
+
+			/** Frequency */
+			br = new BufferedReader(new FileReader(setup_hash.get("DictionaryFolder")+"/taxonomy_freq.txt"));
+			line="";
+			while ((line = br.readLine()) != null)
+			{
+				String l[]=line.split("\t");
+				TaxFreq_hash.put(l[0], Double.parseDouble(l[1])/200000000); //tax id -> prefix
+			}
+			br.close();
+
+			/** SP_Virus2Human_hash */
+			br = new BufferedReader(new FileReader(setup_hash.get("DictionaryFolder")+"/SP_Virus2HumanList.txt"));
+			line="";
+			while ((line = br.readLine()) != null)
+			{
+				SP_Virus2Human_hash.put(line,"9606");
+			}
+			br.close();
+
+			/** SimConcept.MentionType */
+			br = new BufferedReader(new FileReader(setup_hash.get("DictionaryFolder")+"/SimConcept.MentionType.txt"));
+			line="";
+			while ((line = br.readLine()) != null)
+			{
+				String l[]=line.split("\t");
+				SimConceptMention2Type_hash.put(l[0], l[1]);
+			}
+			br.close();
+
+			/** Filtering */
+			br = new BufferedReader(new FileReader(setup_hash.get("DictionaryFolder")+"/Filtering.txt"));
+			line="";
+			while ((line = br.readLine()) != null)
+			{
+				Filtering_hash.put(line, "");
+			}
+			br.close();
+			/** Filtering_WithLongForm.txt */
+			br = new BufferedReader(new FileReader(setup_hash.get("DictionaryFolder")+"/Filtering_WithLongForm.txt"));
+			line="";
+			while ((line = br.readLine()) != null)
+			{
+				String l[]=line.split("\t");
+				Filtering_WithLongForm_hash.put(l[0], l[1]);
+			}
+			br.close();
+
+			/** SPStrain */
+			br = new BufferedReader(new FileReader(setup_hash.get("DictionaryFolder")+"/SPStrain.txt"));
+			line="";
+			while ((line = br.readLine()) != null)
+			{
+				String l[]=line.split("\t");
+				String ancestor_id = l[0];
+				String tax_id = l[1];
+				String tax_names = l[2];
+				StrainID_ancestor2tax_hash.put(ancestor_id, tax_id); // ancestor -> tax_id
+				StrainID_taxid2names_hash.put(tax_id, tax_names); // tax id -> strain
+			}
+			br.close();
+
+			if((!setup_hash.containsKey("IgnoreNER")) || setup_hash.get("IgnoreNER").toLowerCase() != "true")
+			{
+				/** Gene */
+				if(setup_hash.containsKey("FocusSpecies") && !setup_hash.get("FocusSpecies").equals("All"))
+				{
+					PT_Gene.TreeFile2Tree(setup_hash.get("DictionaryFolder")+"/PT_Gene."+setup_hash.get("FocusSpecies")+".txt");
+				}
+				else if((!FocusSpecies.equals("")) && (!FocusSpecies.equals("All")))
+				{
+					PT_Gene.TreeFile2Tree(setup_hash.get("DictionaryFolder")+"/PT_Gene."+ FocusSpecies +".txt");
+				}
+				else
+				{
+					PT_Gene.TreeFile2Tree(setup_hash.get("DictionaryFolder")+"/PT_Gene.txt");
+				}
+
+				/** GeneScoring */
+				String FileName=setup_hash.get("DictionaryFolder")+"/GeneScoring.txt";
+
+				if(setup_hash.containsKey("FocusSpecies") && !setup_hash.get("FocusSpecies").equals("All"))
+				{
+					FileName = setup_hash.get("DictionaryFolder")+"/GeneScoring."+setup_hash.get("FocusSpecies")+".txt";
+				}
+				else if((!FocusSpecies.equals("")) && (!FocusSpecies.equals("All")))
+				{
+					FileName = setup_hash.get("DictionaryFolder")+"/GeneScoring."+ FocusSpecies +".txt";
+				}
+				br = new BufferedReader(new FileReader(FileName));
+				line="";
+				while ((line = br.readLine()) != null)
+				{
+					String l[]=line.split("\t");
+					GeneScoring_hash.put(l[0], l[1]+"\t"+l[2]+"\t"+l[3]+"\t"+l[4]+"\t"+l[5]+"\t"+l[6]);
+				}
+				br.close();
+
+				/** GeneScoring.DF */
+				FileName=setup_hash.get("DictionaryFolder")+"/GeneScoring.DF.txt";
+				if(setup_hash.containsKey("FocusSpecies") && !setup_hash.get("FocusSpecies").equals("All"))
+				{
+					FileName = setup_hash.get("DictionaryFolder")+"/GeneScoring.DF."+setup_hash.get("FocusSpecies")+".txt";
+				}
+				else if((!FocusSpecies.equals("")) && (!FocusSpecies.equals("All")))
+				{
+					FileName = setup_hash.get("DictionaryFolder")+"/GeneScoring.DF."+ FocusSpecies +".txt";
+				}
+				br = new BufferedReader(new FileReader(FileName));
+				double Sum = Double.parseDouble(br.readLine());
+				while ((line = br.readLine()) != null)
+				{
+					String l[]=line.split("\t");
+					// token -> idf
+					GeneScoringDF_hash.put(l[0], Math.log10(Sum/Double.parseDouble(l[1])));
+				}
+				br.close();
+			}
+
+			/** Suffix Translation */
+			SuffixTranslationMap_hash.put("alpha","a");
+			SuffixTranslationMap_hash.put("a","alpha");
+			SuffixTranslationMap_hash.put("beta","b");
+			SuffixTranslationMap_hash.put("b","beta");
+			SuffixTranslationMap_hash.put("delta","d");
+			SuffixTranslationMap_hash.put("d","delta");
+			SuffixTranslationMap_hash.put("z","zeta");
+			SuffixTranslationMap_hash.put("zeta","z");
+			SuffixTranslationMap_hash.put("gamma","g");
+			SuffixTranslationMap_hash.put("g","gamma");
+			SuffixTranslationMap_hash.put("r","gamma");
+			SuffixTranslationMap_hash.put("y","gamma");
+
+			SuffixTranslationMap2_hash.put("2","ii");
+			SuffixTranslationMap2_hash.put("ii","2");
+			SuffixTranslationMap2_hash.put("II","2");
+			SuffixTranslationMap2_hash.put("1","i");
+			SuffixTranslationMap2_hash.put("i","1");
+			SuffixTranslationMap2_hash.put("I","1");
+
+			/** GeneID */
+			if(setup_hash.containsKey("GeneIDMatch") && setup_hash.get("GeneIDMatch").toLowerCase().equals("true"))
+			{
+				br = new BufferedReader(new FileReader(setup_hash.get("DictionaryFolder")+"/GeneIDs.txt"));
+				line="";
+				while ((line = br.readLine()) != null)
+				{
+					String l[]=line.split("\t");
+					GeneIDs_hash.put(l[0],l[1]);
+				}
+				br.close();
+			}
+
+			/** Normalization2Protein */
+			if(setup_hash.containsKey("Normalization2Protein") && setup_hash.get("Normalization2Protein").toLowerCase().equals("true"))
+			{
+				br = new BufferedReader(new FileReader(setup_hash.get("DictionaryFolder")+"/Gene2Protein.txt"));
+				line="";
+				while ((line = br.readLine()) != null)
+				{
+					String l[]=line.split("\t");
+					Normalization2Protein_hash.put(l[0],l[1]);
+				}
+				br.close();
+			}
+
+			/** HomologeneID */
+			if(setup_hash.containsKey("HomologeneID") && setup_hash.get("HomologeneID").toLowerCase().equals("true"))
+			{
+				br = new BufferedReader(new FileReader(setup_hash.get("DictionaryFolder")+"/Gene2Homoid.txt"));
+				line="";
+				while ((line = br.readLine()) != null)
+				{
+					String l[]=line.split("\t");
+					HomologeneID_hash.put(l[0],l[1]);
+				}
+				br.close();
+			}
+
+			/** GeneChromosome */
+			//PT_GeneChromosome.TreeFile2Tree(setup_hash.get("DictionaryFolder")+"/PT_GeneChromosome.txt");
+		}
+		endTime = System.currentTimeMillis();
+		totTime = endTime - startTime;
+		System.out.println("Loading Gene Dictionary : Processing Time:"+totTime/1000+"sec");
+		return TrainTest;
 	}
 
 	private static void processFile(String inputFilePath, String InputFileName, String outputFilePath, double startTime, String TrainTest) throws IOException, XMLStreamException {
