@@ -15,10 +15,6 @@ import java.util.regex.Pattern;
 
 import javax.xml.stream.XMLStreamException;
 
-import GNormPluslib.PrefixTree;
-import GNormPluslib.GNR;
-import GNormPluslib.SR;
-
 public class GNormPlus
 {
 	public static PrefixTree PT_Species = new PrefixTree();
@@ -448,313 +444,324 @@ public class GNormPlus
 			{
 				if (listOfFiles[i].isFile()) 
 				{
-					String InputFile = listOfFiles[i].getName();
-					System.out.println("Processing " + InputFile);
-					File f = new File(OutputFolder+"/"+InputFile);
+					String InputFileName = listOfFiles[i].getName();
+					System.out.println("Processing " + InputFileName);
+					final String outputFilePath = OutputFolder + "/" + InputFileName;
+					final String inputFilePath = InputFolder + "/" + InputFileName;
+					File f = new File(outputFilePath);
 					if(f.exists() && !f.isDirectory()) 
 					{ 
-						System.out.println(InputFolder+"/"+InputFile+" - Done. (The output file exists in output folder)");
+						System.out.println(InputFolder+"/"+InputFileName+" - Done. (The output file exists in output folder)");
 					}
 					else
 					{
-						final GNPProcessingData data = new GNPProcessingData();
-//						BioCDocobj = new BioCDoc();
-						
-						/*
-						 * Format Check 
-						 */
-						String Format = "";
-//						String checkR = BioCDocobj.BioCFormatCheck(InputFolder+"/"+InputFile);
-						String checkR = data.getBioCDocobj().BioCFormatCheck(InputFolder+"/"+InputFile);
-						if(checkR.equals("BioC"))
-						{
-							Format = "BioC";
-						}
-						else if(checkR.equals("PubTator"))
-						{
-							Format = "PubTator";
-						}
-						else
-						{
-							System.out.println(checkR);
-							System.exit(0);
-						}
-						
-						System.out.print(InputFolder+"/"+InputFile+" - ("+Format+" format) : Processing ... \r");
-						/*
-						 * GNR
-						 */
-						if(setup_hash.containsKey("IgnoreNER")  && setup_hash.get("IgnoreNER").toLowerCase().equals("true") ) // pre-annotated name entities
-						{
-							if(Format.equals("PubTator"))
-							{
-//								BioCDocobj.PubTator2BioC(InputFolder+"/"+InputFile,"tmp/"+InputFile);
-								data.getBioCDocobj().PubTator2BioC(InputFolder+"/"+InputFile,"tmp/"+InputFile);
-								br = new BufferedReader(new FileReader("tmp/"+InputFile));
-								BufferedWriter fr = new BufferedWriter(new OutputStreamWriter(new FileOutputStream("tmp/"+InputFile+".GNR.xml"), "UTF-8"));
-								line="";
-								while ((line = br.readLine()) != null)  
-								{
-									fr.write(line);
-								}
-								br.close();
-								fr.close();
-							}
-							else if(Format.equals("BioC"))
-							{
-								br = new BufferedReader(new FileReader(InputFolder+"/"+InputFile));
-								BufferedWriter fr = new BufferedWriter(new OutputStreamWriter(new FileOutputStream("tmp/"+InputFile+".GNR.xml"), "UTF-8"));
-								line="";
-								while ((line = br.readLine()) != null)  
-								{
-									fr.write(line);
-								}
-								br.close();
-								fr.close();
-							}
-							GNR GNRobj = new GNR(data);
-//							GNormPlus.BioCDocobj.BioCReaderWithAnnotation("tmp/"+InputFile+".GNR.xml");
-							data.getBioCDocobj().BioCReaderWithAnnotation("tmp/"+InputFile+".GNR.xml");
-							GNRobj.Ab3P("tmp/"+InputFile+".GNR.xml","tmp/"+InputFile+".Abb",TrainTest);
-						}
-						else
-						{
-							GNR GNRobj = new GNR(data);
-							
-							if(TrainTest.equals("Test") || TrainTest.equals("Train"))//Test & Train
-							{
-								if(Format.equals("PubTator"))
-								{
-//									BioCDocobj.PubTator2BioC(InputFolder+"/"+InputFile,"tmp/"+InputFile);
-									data.getBioCDocobj().PubTator2BioC(InputFolder+"/"+InputFile,"tmp/"+InputFile);
-									GNRobj.LoadInputFile("tmp/"+InputFile,"tmp/"+InputFile+".Abb",TrainTest);
-								}
-								else if(Format.equals("BioC"))
-								{
-									GNRobj.LoadInputFile(InputFolder+"/"+InputFile,"tmp/"+InputFile+".Abb",TrainTest);
-								}
-								
-								GNRobj.FeatureExtraction("tmp/"+InputFile+".data","tmp/"+InputFile+".loca",TrainTest);
-								
-								if(TrainTest.equals("Test"))
-								{
-									GNRobj.CRF_test(setup_hash.get("GNRModel"),"tmp/"+InputFile+".data","tmp/"+InputFile+".output","top3"); //top3
-									
-									if(Format.equals("PubTator"))
-									{
-										GNRobj.ReadCRFresult("tmp/"+InputFile,"tmp/"+InputFile+".loca","tmp/"+InputFile+".output","tmp/"+InputFile+".GNR.xml",0.005,0.05); //0.005,0.05
-										GNRobj.PostProcessing("tmp/"+InputFile,"tmp/"+InputFile+".GNR.xml");
-									}
-									else if(Format.equals("BioC"))
-									{
-										GNRobj.ReadCRFresult(InputFolder+"/"+InputFile,"tmp/"+InputFile+".loca","tmp/"+InputFile+".output","tmp/"+InputFile+".GNR.xml",0.005,0.05); //0.005,0.05
-										GNRobj.PostProcessing(InputFolder+"/"+InputFile,"tmp/"+InputFile+".GNR.xml");
-									}
-								}
-							}
-							else if( (setup_hash.containsKey("IgnoreNER") && setup_hash.get("IgnoreNER").toLowerCase().equals("true") ) || 
-									TrainTest.equals("TrainSC")
-									) // IgnoreNER & Train & TrainSC
-							{
-								if(Format.equals("PubTator"))
-								{
-//									BioCDocobj.PubTator2BioC(InputFolder+"/"+InputFile,"tmp/"+InputFile);
-									data.getBioCDocobj().PubTator2BioC(InputFolder+"/"+InputFile,"tmp/"+InputFile);
-									GNRobj.LoadInputFile("tmp/"+InputFile,"tmp/"+InputFile+".Abb","Train");
-									GNRobj.PostProcessing("tmp/"+InputFile,"tmp/"+InputFile+".GNR.xml");
-								}
-								else if(Format.equals("BioC"))
-								{
-									GNRobj.LoadInputFile(InputFolder+"/"+InputFile,"tmp/"+InputFile+".Abb","Train");
-									GNRobj.PostProcessing(InputFolder+"/"+InputFile,"tmp/"+InputFile+".GNR.xml");
-								}
-								
-							}
-						}
-						
-						/*
-						 * SR & SA
-						 */
-						if(TrainTest.equals("Test") && (!setup_hash.get("GeneNormalizationOnly").toLowerCase().equals("true")))
-						{
-							SR SRobj = new SR(data);
-							
-							if(Format.equals("PubTator"))
-							{
-								SRobj.SpeciesRecognition("tmp/"+InputFile,"tmp/"+InputFile+".SR.xml",setup_hash.get("DictionaryFolder")+"/SPStrain.txt",setup_hash.get("FilterAntibody"));
-								if(setup_hash.containsKey("GeneSpeciesRecognitionOnly")  && setup_hash.get("GeneSpeciesRecognitionOnly").toLowerCase().equals("true") ) // GeneSpeciesRecognitionOnly
-								{
-//									BioCDocobj.BioC2PubTator(InputFolder+"/"+InputFile,"tmp/"+InputFile+".SR.xml",OutputFolder+"/"+InputFile);
-									data.getBioCDocobj().BioC2PubTator(InputFolder+"/"+InputFile,"tmp/"+InputFile+".SR.xml",OutputFolder+"/"+InputFile);
-								}
-							}
-							else
-							{
-								if(setup_hash.containsKey("GeneSpeciesRecognitionOnly")  && setup_hash.get("GeneSpeciesRecognitionOnly").toLowerCase().equals("true") ) // GeneSpeciesRecognitionOnly
-								{
-									SRobj.SpeciesRecognition(InputFolder+"/"+InputFile,OutputFolder+"/"+InputFile+".SR.xml",setup_hash.get("DictionaryFolder")+"/SPStrain.txt",setup_hash.get("FilterAntibody"));
-								}
-								else
-								{
-									SRobj.SpeciesRecognition(InputFolder+"/"+InputFile,"tmp/"+InputFile+".SR.xml",setup_hash.get("DictionaryFolder")+"/SPStrain.txt",setup_hash.get("FilterAntibody"));
-								}
-							}
-							
-							if((!setup_hash.containsKey("GeneSpeciesRecognitionOnly"))  || (!setup_hash.get("GeneSpeciesRecognitionOnly").toLowerCase().equals("true")) )
-							{
-								if(setup_hash.containsKey("FocusSpecies") && !setup_hash.get("FocusSpecies").equals("All"))
-								{
-									if(Format.equals("PubTator"))
-									{
-										SRobj.SpeciesAssignment("tmp/"+InputFile,"tmp/"+InputFile+".SA.xml",setup_hash.get("FocusSpecies"));
-									}
-									else if(Format.equals("BioC"))
-									{
-										SRobj.SpeciesAssignment(InputFolder+"/"+InputFile,"tmp/"+InputFile+".SA.xml",setup_hash.get("FocusSpecies"));
-									}
-								}
-								else
-								{
-									if(Format.equals("PubTator"))
-									{
-										SRobj.SpeciesAssignment("tmp/"+InputFile,"tmp/"+InputFile+".SA.xml");
-									}
-									else if(Format.equals("BioC"))
-									{
-										SRobj.SpeciesAssignment(InputFolder+"/"+InputFile,"tmp/"+InputFile+".SA.xml");
-									}
-								}
-							}
-						}
-						else
-						{
-							//GNR.xml copy to SA.xml
-							br = new BufferedReader(new FileReader("tmp/"+InputFile+".GNR.xml"));
-							BufferedWriter fr = new BufferedWriter(new OutputStreamWriter(new FileOutputStream("tmp/"+InputFile+".SA.xml"), "UTF-8"));
-							line="";
-							while ((line = br.readLine()) != null)  
-							{
-								fr.write(line);
-							}
-							br.close();
-							fr.close();
-						}
-						
-						
-						if(setup_hash.get("SpeciesAssignmentOnly").equals("True"))
-						{
-							if(Format.equals("PubTator"))
-							{
-//								BioCDocobj.BioC2PubTator(InputFolder+"/"+InputFile,"tmp/"+InputFile+".SA.xml",OutputFolder+"/"+InputFile);
-								data.getBioCDocobj().BioC2PubTator(InputFolder+"/"+InputFile,"tmp/"+InputFile+".SA.xml",OutputFolder+"/"+InputFile);
-							}
-							else
-							{
-								File fileSA_tmp = new File("tmp/"+InputFile+".SA.xml");
-								File fileSA_output = new File(OutputFolder+"/"+InputFile);
-								fileSA_tmp.renameTo(fileSA_output);
-							}
-						}
-						else // Normalization
-						{	
-							if((!setup_hash.containsKey("GeneSpeciesRecognitionOnly"))  || (!setup_hash.get("GeneSpeciesRecognitionOnly").toLowerCase().equals("true")) )
-							{
-								/*
-								 * SimConcept
-								 */
-								{
-									SimConcept SCobj = new SimConcept(data);
-									if(TrainTest.equals("TrainSC"))
-									{
-										SCobj.FeatureExtraction_Train("tmp/"+InputFile+".SC.data");
-										SCobj.CRF_learn(setup_hash.get("SCModel"),"tmp/"+InputFile+".SC.data");
-									}
-									else if(TrainTest.equals("Test"))
-									{
-										SCobj.FeatureExtraction_Test("tmp/"+InputFile+".SC.data");
-										SCobj.CRF_test(setup_hash.get("SCModel"),"tmp/"+InputFile+".SC.data","tmp/"+InputFile+".SC.output");
-										
-										if(Format.equals("PubTator"))
-										{
-											SCobj.ReadCRFresult("tmp/"+InputFile,"tmp/"+InputFile+".SC.output","tmp/"+InputFile+".SC.xml");
-										}
-										else
-										{
-											SCobj.ReadCRFresult(InputFolder+"/"+InputFile,"tmp/"+InputFile+".SC.output","tmp/"+InputFile+".SC.xml");
-										}
-										
-									}
-								}
-								
-								/*
-								 * GN
-								 */
-								if(TrainTest.equals("Test"))
-								{
-									GN GNobj = new GN(data);
-									GNobj.PreProcessing4GN(InputFolder+"/"+InputFile,"tmp/"+InputFile+".PreProcessing4GN.xml");
-									GNobj.ChromosomeRecognition(InputFolder+"/"+InputFile,"tmp/"+InputFile+".GN.xml");
-									if(setup_hash.containsKey("GeneIDMatch") && setup_hash.get("GeneIDMatch").equals("True"))
-									{
-										if(Format.equals("PubTator"))
-										{
-											GNobj.GeneNormalization("tmp/"+InputFile,"tmp/"+InputFile+".GN.xml",true);
-											GNobj.GeneIDRecognition("tmp/"+InputFile,"tmp/"+InputFile+".GN.xml");
-//											BioCDocobj.BioC2PubTator("tmp/"+InputFile+".GN.xml",OutputFolder+"/"+InputFile);
-											data.getBioCDocobj().BioC2PubTator("tmp/"+InputFile+".GN.xml",OutputFolder+"/"+InputFile);
-										}
-										else if(Format.equals("BioC"))
-										{
-											GNobj.GeneNormalization(InputFolder+"/"+InputFile,"tmp/"+InputFile+".GN.xml",true);
-											GNobj.GeneIDRecognition(InputFolder+"/"+InputFile,OutputFolder+"/"+InputFile);
-										}
-									}
-									else
-									{
-										if(Format.equals("PubTator"))
-										{
-											GNobj.GeneNormalization("tmp/"+InputFile,"tmp/"+InputFile+".GN.xml",false);
-//											BioCDocobj.BioC2PubTator(InputFolder+"/"+InputFile,"tmp/"+InputFile+".GN.xml",OutputFolder+"/"+InputFile);
-											data.getBioCDocobj().BioC2PubTator(InputFolder+"/"+InputFile,"tmp/"+InputFile+".GN.xml",OutputFolder+"/"+InputFile);
-										}
-										else if(Format.equals("BioC"))
-										{
-											GNobj.GeneNormalization(InputFolder+"/"+InputFile,OutputFolder+"/"+InputFile,false);
-										}
-									}
-								}
-							}
-						}
-						
-						/*
-						 * remove tmp files
-						 */
-						if((!setup_hash.containsKey("DeleteTmp")) || setup_hash.get("DeleteTmp").toLowerCase().equals("true"))
-						{
-							String path="tmp"; 
-					        File file = new File(path);
-					        File[] files = file.listFiles(); 
-					        for (File ftmp:files) 
-					        {
-					        	if (ftmp.isFile() && ftmp.exists()) 
-					            {
-					        		if(ftmp.toString().matches("tmp."+InputFile+".*"))
-						        	{
-					        			ftmp.delete();
-						        	}
-					        	}
-					        }
-						}
-						
-						/*
-						 * Time stamp - last
-						 */
-						endTime = System.currentTimeMillis();
-						totTime = endTime - startTime;
-						System.out.println(InputFolder+"/"+InputFile+" - ("+Format+" format) : Processing Time:"+totTime/1000+"sec");
+
+						processFile(inputFilePath, InputFileName, outputFilePath, startTime, TrainTest);
 					}
 				}
 			}
 		}
+	}
+
+	private static void processFile(String inputFilePath, String InputFileName, String outputFilePath, double startTime, String TrainTest) throws IOException, XMLStreamException {
+		double endTime;
+		BufferedReader br;
+		double totTime;
+		String line;
+		final GNPProcessingData data = new GNPProcessingData();
+//						BioCDocobj = new BioCDoc();
+
+		/*
+		 * Format Check
+		 */
+		String Format = "";
+//						String checkR = BioCDocobj.BioCFormatCheck(InputFolder+"/"+InputFileName);
+		String checkR = data.getBioCDocobj().BioCFormatCheck(inputFilePath);
+		if(checkR.equals("BioC"))
+		{
+			Format = "BioC";
+		}
+		else if(checkR.equals("PubTator"))
+		{
+			Format = "PubTator";
+		}
+		else
+		{
+			System.out.println(checkR);
+			System.exit(0);
+		}
+
+		System.out.print(inputFilePath +" - ("+Format+" format) : Processing ... \r");
+		/*
+		 * GNR
+		 */
+		if(setup_hash.containsKey("IgnoreNER")  && setup_hash.get("IgnoreNER").toLowerCase().equals("true") ) // pre-annotated name entities
+		{
+			if(Format.equals("PubTator"))
+			{
+//								BioCDocobj.PubTator2BioC(InputFolder+"/"+InputFileName,"tmp/"+InputFileName);
+				data.getBioCDocobj().PubTator2BioC(inputFilePath,"tmp/"+ InputFileName);
+				br = new BufferedReader(new FileReader("tmp/"+ InputFileName));
+				BufferedWriter fr = new BufferedWriter(new OutputStreamWriter(new FileOutputStream("tmp/"+ InputFileName +".GNR.xml"), "UTF-8"));
+				line="";
+				while ((line = br.readLine()) != null)
+				{
+					fr.write(line);
+				}
+				br.close();
+				fr.close();
+			}
+			else if(Format.equals("BioC"))
+			{
+				br = new BufferedReader(new FileReader(inputFilePath));
+				BufferedWriter fr = new BufferedWriter(new OutputStreamWriter(new FileOutputStream("tmp/"+ InputFileName +".GNR.xml"), "UTF-8"));
+				line="";
+				while ((line = br.readLine()) != null)
+				{
+					fr.write(line);
+				}
+				br.close();
+				fr.close();
+			}
+			GNR GNRobj = new GNR(data);
+//							GNormPlus.BioCDocobj.BioCReaderWithAnnotation("tmp/"+InputFileName+".GNR.xml");
+			data.getBioCDocobj().BioCReaderWithAnnotation("tmp/"+ InputFileName +".GNR.xml");
+			GNRobj.Ab3P("tmp/"+ InputFileName +".GNR.xml","tmp/"+ InputFileName +".Abb", TrainTest);
+		}
+		else
+		{
+			GNR GNRobj = new GNR(data);
+
+			if(TrainTest.equals("Test") || TrainTest.equals("Train"))//Test & Train
+			{
+				if(Format.equals("PubTator"))
+				{
+//									BioCDocobj.PubTator2BioC(InputFolder+"/"+InputFileName,"tmp/"+InputFileName);
+					data.getBioCDocobj().PubTator2BioC(inputFilePath,"tmp/"+ InputFileName);
+					GNRobj.LoadInputFile("tmp/"+ InputFileName,"tmp/"+ InputFileName +".Abb", TrainTest);
+				}
+				else if(Format.equals("BioC"))
+				{
+					GNRobj.LoadInputFile(inputFilePath,"tmp/"+ InputFileName +".Abb", TrainTest);
+				}
+
+				GNRobj.FeatureExtraction("tmp/"+ InputFileName +".data","tmp/"+ InputFileName +".loca", TrainTest);
+
+				if(TrainTest.equals("Test"))
+				{
+					GNRobj.CRF_test(setup_hash.get("GNRModel"),"tmp/"+ InputFileName +".data","tmp/"+ InputFileName +".output","top3"); //top3
+
+					if(Format.equals("PubTator"))
+					{
+						GNRobj.ReadCRFresult("tmp/"+ InputFileName,"tmp/"+ InputFileName +".loca","tmp/"+ InputFileName +".output","tmp/"+ InputFileName +".GNR.xml",0.005,0.05); //0.005,0.05
+						GNRobj.PostProcessing("tmp/"+ InputFileName,"tmp/"+ InputFileName +".GNR.xml");
+					}
+					else if(Format.equals("BioC"))
+					{
+						GNRobj.ReadCRFresult(inputFilePath,"tmp/"+ InputFileName +".loca","tmp/"+ InputFileName +".output","tmp/"+ InputFileName +".GNR.xml",0.005,0.05); //0.005,0.05
+						GNRobj.PostProcessing(inputFilePath,"tmp/"+ InputFileName +".GNR.xml");
+					}
+				}
+			}
+			else if( (setup_hash.containsKey("IgnoreNER") && setup_hash.get("IgnoreNER").toLowerCase().equals("true") ) ||
+					TrainTest.equals("TrainSC")
+					) // IgnoreNER & Train & TrainSC
+			{
+				if(Format.equals("PubTator"))
+				{
+//									BioCDocobj.PubTator2BioC(InputFolder+"/"+InputFileName,"tmp/"+InputFileName);
+					data.getBioCDocobj().PubTator2BioC(inputFilePath,"tmp/"+ InputFileName);
+					GNRobj.LoadInputFile("tmp/"+ InputFileName,"tmp/"+ InputFileName +".Abb","Train");
+					GNRobj.PostProcessing("tmp/"+ InputFileName,"tmp/"+ InputFileName +".GNR.xml");
+				}
+				else if(Format.equals("BioC"))
+				{
+					GNRobj.LoadInputFile(inputFilePath,"tmp/"+ InputFileName +".Abb","Train");
+					GNRobj.PostProcessing(inputFilePath,"tmp/"+ InputFileName +".GNR.xml");
+				}
+
+			}
+		}
+
+		/*
+		 * SR & SA
+		 */
+		if(TrainTest.equals("Test") && (!setup_hash.get("GeneNormalizationOnly").toLowerCase().equals("true")))
+		{
+			SR SRobj = new SR(data);
+
+			if(Format.equals("PubTator"))
+			{
+				SRobj.SpeciesRecognition("tmp/"+ InputFileName,"tmp/"+ InputFileName +".SR.xml",setup_hash.get("DictionaryFolder")+"/SPStrain.txt",setup_hash.get("FilterAntibody"));
+				if(setup_hash.containsKey("GeneSpeciesRecognitionOnly")  && setup_hash.get("GeneSpeciesRecognitionOnly").toLowerCase().equals("true") ) // GeneSpeciesRecognitionOnly
+				{
+//									BioCDocobj.BioC2PubTator(InputFolder+"/"+InputFileName,"tmp/"+InputFileName+".SR.xml",OutputFolder+"/"+InputFileName);
+					data.getBioCDocobj().BioC2PubTator(inputFilePath,"tmp/"+ InputFileName +".SR.xml", outputFilePath);
+				}
+			}
+			else
+			{
+				if(setup_hash.containsKey("GeneSpeciesRecognitionOnly")  && setup_hash.get("GeneSpeciesRecognitionOnly").toLowerCase().equals("true") ) // GeneSpeciesRecognitionOnly
+				{
+					SRobj.SpeciesRecognition(inputFilePath, outputFilePath +".SR.xml",setup_hash.get("DictionaryFolder")+"/SPStrain.txt",setup_hash.get("FilterAntibody"));
+				}
+				else
+				{
+					SRobj.SpeciesRecognition(inputFilePath,"tmp/"+ InputFileName +".SR.xml",setup_hash.get("DictionaryFolder")+"/SPStrain.txt",setup_hash.get("FilterAntibody"));
+				}
+			}
+
+			if((!setup_hash.containsKey("GeneSpeciesRecognitionOnly"))  || (!setup_hash.get("GeneSpeciesRecognitionOnly").toLowerCase().equals("true")) )
+			{
+				if(setup_hash.containsKey("FocusSpecies") && !setup_hash.get("FocusSpecies").equals("All"))
+				{
+					if(Format.equals("PubTator"))
+					{
+						SRobj.SpeciesAssignment("tmp/"+ InputFileName,"tmp/"+ InputFileName +".SA.xml",setup_hash.get("FocusSpecies"));
+					}
+					else if(Format.equals("BioC"))
+					{
+						SRobj.SpeciesAssignment(inputFilePath,"tmp/"+ InputFileName +".SA.xml",setup_hash.get("FocusSpecies"));
+					}
+				}
+				else
+				{
+					if(Format.equals("PubTator"))
+					{
+						SRobj.SpeciesAssignment("tmp/"+ InputFileName,"tmp/"+ InputFileName +".SA.xml");
+					}
+					else if(Format.equals("BioC"))
+					{
+						SRobj.SpeciesAssignment(inputFilePath,"tmp/"+ InputFileName +".SA.xml");
+					}
+				}
+			}
+		}
+		else
+		{
+			//GNR.xml copy to SA.xml
+			br = new BufferedReader(new FileReader("tmp/"+ InputFileName +".GNR.xml"));
+			BufferedWriter fr = new BufferedWriter(new OutputStreamWriter(new FileOutputStream("tmp/"+ InputFileName +".SA.xml"), "UTF-8"));
+			line="";
+			while ((line = br.readLine()) != null)
+			{
+				fr.write(line);
+			}
+			br.close();
+			fr.close();
+		}
+
+
+		if(setup_hash.get("SpeciesAssignmentOnly").equals("True"))
+		{
+			if(Format.equals("PubTator"))
+			{
+//								BioCDocobj.BioC2PubTator(InputFolder+"/"+InputFileName,"tmp/"+InputFileName+".SA.xml",OutputFolder+"/"+InputFileName);
+				data.getBioCDocobj().BioC2PubTator(inputFilePath,"tmp/"+ InputFileName +".SA.xml", outputFilePath);
+			}
+			else
+			{
+				File fileSA_tmp = new File("tmp/"+ InputFileName +".SA.xml");
+				File fileSA_output = new File(outputFilePath);
+				fileSA_tmp.renameTo(fileSA_output);
+			}
+		}
+		else // Normalization
+		{
+			if((!setup_hash.containsKey("GeneSpeciesRecognitionOnly"))  || (!setup_hash.get("GeneSpeciesRecognitionOnly").toLowerCase().equals("true")) )
+			{
+				/*
+				 * SimConcept
+				 */
+				{
+					SimConcept SCobj = new SimConcept(data);
+					if(TrainTest.equals("TrainSC"))
+					{
+						SCobj.FeatureExtraction_Train("tmp/"+ InputFileName +".SC.data");
+						SCobj.CRF_learn(setup_hash.get("SCModel"),"tmp/"+ InputFileName +".SC.data");
+					}
+					else if(TrainTest.equals("Test"))
+					{
+						SCobj.FeatureExtraction_Test("tmp/"+ InputFileName +".SC.data");
+						SCobj.CRF_test(setup_hash.get("SCModel"),"tmp/"+ InputFileName +".SC.data","tmp/"+ InputFileName +".SC.output");
+
+						if(Format.equals("PubTator"))
+						{
+							SCobj.ReadCRFresult("tmp/"+ InputFileName,"tmp/"+ InputFileName +".SC.output","tmp/"+ InputFileName +".SC.xml");
+						}
+						else
+						{
+							SCobj.ReadCRFresult(inputFilePath,"tmp/"+ InputFileName +".SC.output","tmp/"+ InputFileName +".SC.xml");
+						}
+
+					}
+				}
+
+				/*
+				 * GN
+				 */
+				if(TrainTest.equals("Test"))
+				{
+					GN GNobj = new GN(data);
+					GNobj.PreProcessing4GN(inputFilePath,"tmp/"+ InputFileName +".PreProcessing4GN.xml");
+					GNobj.ChromosomeRecognition(inputFilePath,"tmp/"+ InputFileName +".GN.xml");
+					if(setup_hash.containsKey("GeneIDMatch") && setup_hash.get("GeneIDMatch").equals("True"))
+					{
+						if(Format.equals("PubTator"))
+						{
+							GNobj.GeneNormalization("tmp/"+ InputFileName,"tmp/"+ InputFileName +".GN.xml",true);
+							GNobj.GeneIDRecognition("tmp/"+ InputFileName,"tmp/"+ InputFileName +".GN.xml");
+//											BioCDocobj.BioC2PubTator("tmp/"+InputFileName+".GN.xml",OutputFolder+"/"+InputFileName);
+							data.getBioCDocobj().BioC2PubTator("tmp/"+ InputFileName +".GN.xml", outputFilePath);
+						}
+						else if(Format.equals("BioC"))
+						{
+							GNobj.GeneNormalization(inputFilePath,"tmp/"+ InputFileName +".GN.xml",true);
+							GNobj.GeneIDRecognition(inputFilePath, outputFilePath);
+						}
+					}
+					else
+					{
+						if(Format.equals("PubTator"))
+						{
+							GNobj.GeneNormalization("tmp/"+ InputFileName,"tmp/"+ InputFileName +".GN.xml",false);
+//											BioCDocobj.BioC2PubTator(InputFolder+"/"+InputFileName,"tmp/"+InputFileName+".GN.xml",OutputFolder+"/"+InputFileName);
+							data.getBioCDocobj().BioC2PubTator(inputFilePath,"tmp/"+ InputFileName +".GN.xml", outputFilePath);
+						}
+						else if(Format.equals("BioC"))
+						{
+							GNobj.GeneNormalization(inputFilePath, outputFilePath,false);
+						}
+					}
+				}
+			}
+		}
+
+		/*
+		 * remove tmp files
+		 */
+		if((!setup_hash.containsKey("DeleteTmp")) || setup_hash.get("DeleteTmp").toLowerCase().equals("true"))
+		{
+			String path="tmp";
+			File file = new File(path);
+			File[] files = file.listFiles();
+			for (File ftmp:files)
+			{
+				if (ftmp.isFile() && ftmp.exists())
+				{
+					if(ftmp.toString().matches("tmp."+ InputFileName +".*"))
+					{
+						ftmp.delete();
+					}
+				}
+			}
+		}
+
+		/*
+		 * Time stamp - last
+		 */
+		endTime = System.currentTimeMillis();
+		totTime = endTime - startTime;
+		System.out.println(inputFilePath +" - ("+Format+" format) : Processing Time:"+totTime/1000+"sec");
 	}
 }
