@@ -21,8 +21,6 @@ import GNormPluslib.SR;
 
 public class GNormPlus
 {
-	@Deprecated
-	public static BioCDoc BioCDocobj = new BioCDoc();
 	public static PrefixTree PT_Species = new PrefixTree();
 	public static PrefixTree PT_Cell = new PrefixTree();
 	public static PrefixTree PT_CTDGene = new PrefixTree();
@@ -514,14 +512,14 @@ public class GNormPlus
 								br.close();
 								fr.close();
 							}
-							GNR GNRobj = new GNR();
+							GNR GNRobj = new GNR(data);
 //							GNormPlus.BioCDocobj.BioCReaderWithAnnotation("tmp/"+InputFile+".GNR.xml");
 							data.getBioCDocobj().BioCReaderWithAnnotation("tmp/"+InputFile+".GNR.xml");
 							GNRobj.Ab3P("tmp/"+InputFile+".GNR.xml","tmp/"+InputFile+".Abb",TrainTest);
 						}
 						else
 						{
-							GNR GNRobj = new GNR();
+							GNR GNRobj = new GNR(data);
 							
 							if(TrainTest.equals("Test") || TrainTest.equals("Train"))//Test & Train
 							{
@@ -579,7 +577,7 @@ public class GNormPlus
 						 */
 						if(TrainTest.equals("Test") && (!setup_hash.get("GeneNormalizationOnly").toLowerCase().equals("true")))
 						{
-							SR SRobj = new SR();
+							SR SRobj = new SR(data);
 							
 							if(Format.equals("PubTator"))
 							{
@@ -665,7 +663,7 @@ public class GNormPlus
 								 * SimConcept
 								 */
 								{
-									SimConcept SCobj = new SimConcept();
+									SimConcept SCobj = new SimConcept(data);
 									if(TrainTest.equals("TrainSC"))
 									{
 										SCobj.FeatureExtraction_Train("tmp/"+InputFile+".SC.data");
@@ -693,7 +691,7 @@ public class GNormPlus
 								 */
 								if(TrainTest.equals("Test"))
 								{
-									GN GNobj = new GN();
+									GN GNobj = new GN(data);
 									GNobj.PreProcessing4GN(InputFolder+"/"+InputFile,"tmp/"+InputFile+".PreProcessing4GN.xml");
 									GNobj.ChromosomeRecognition(InputFolder+"/"+InputFile,"tmp/"+InputFile+".GN.xml");
 									if(setup_hash.containsKey("GeneIDMatch") && setup_hash.get("GeneIDMatch").equals("True"))

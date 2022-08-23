@@ -46,6 +46,13 @@ import java.util.Locale;
 
 public class SimConcept 
 {
+	private GNPProcessingData data;
+
+	public SimConcept(GNPProcessingData data) {
+
+		this.data = data;
+	}
+
 	/*
 	 * Feature Extraction
 	 */
@@ -58,14 +65,14 @@ public class SimConcept
 			//NLP modules
 			SnowballStemmer stemmer = new englishStemmer();
 			/** PMIDs : i */
-			for (int i = 0; i < GNormPlus.BioCDocobj.PMIDs.size(); i++)
+			for (int i = 0; i < data.getBioCDocobj().PMIDs.size(); i++)
 			{
-				String Pmid = GNormPlus.BioCDocobj.PMIDs.get(i);
+				String Pmid = data.getBioCDocobj().PMIDs.get(i);
 				
 				/** Paragraphs : j */
-				for (int j = 0; j < GNormPlus.BioCDocobj.PassageNames.get(i).size(); j++)
+				for (int j = 0; j < data.getBioCDocobj().PassageNames.get(i).size(); j++)
 				{
-					ArrayList<String> Annotation = GNormPlus.BioCDocobj.Annotations.get(i).get(j);
+					ArrayList<String> Annotation = data.getBioCDocobj().Annotations.get(i).get(j);
 					/** Annotations : k 
 					 * 0 start
 					 * 1 last
@@ -435,14 +442,14 @@ public class SimConcept
 			//NLP modules
 			SnowballStemmer stemmer = new englishStemmer();
 			/** PMIDs : i */
-			for (int i = 0; i < GNormPlus.BioCDocobj.Annotations.size(); i++)
+			for (int i = 0; i < data.getBioCDocobj().Annotations.size(); i++)
 			{
-				String Pmid = GNormPlus.BioCDocobj.PMIDs.get(i);
+				String Pmid = data.getBioCDocobj().PMIDs.get(i);
 				
 				/** Paragraphs : j */
-				for (int j = 0; j < GNormPlus.BioCDocobj.Annotations.get(i).size(); j++)
+				for (int j = 0; j < data.getBioCDocobj().Annotations.get(i).size(); j++)
 				{
-					ArrayList<String> Annotation = GNormPlus.BioCDocobj.Annotations.get(i).get(j);
+					ArrayList<String> Annotation = data.getBioCDocobj().Annotations.get(i).get(j);
 					/** Annotations : k 
 					 * 0 start
 					 * 1 last
@@ -1379,14 +1386,14 @@ public class SimConcept
 			}
 		}
 		
-		for (int i = 0; i < GNormPlus.BioCDocobj.Annotations.size(); i++)
+		for (int i = 0; i < data.getBioCDocobj().Annotations.size(); i++)
 		{
-			for (int j = 0; j < GNormPlus.BioCDocobj.Annotations.get(i).size(); j++)
+			for (int j = 0; j < data.getBioCDocobj().Annotations.get(i).size(); j++)
 			{
-				int Annotation_Num = GNormPlus.BioCDocobj.Annotations.get(i).get(j).size();
+				int Annotation_Num = data.getBioCDocobj().Annotations.get(i).get(j).size();
 				for (int k = 0; k < Annotation_Num ; k++)   // k : Annotations
 				{
-					String anno[]=GNormPlus.BioCDocobj.Annotations.get(i).get(j).get(k).split("\\t"); //Mention
+					String anno[]=data.getBioCDocobj().Annotations.get(i).get(j).get(k).split("\\t"); //Mention
 					String MenArr[]=anno[2].split("\\|");
 	        		for(int m=0;m<MenArr.length;m++)
 	        		{
@@ -1400,7 +1407,7 @@ public class SimConcept
 	        					for(int s=0;s<split_men.length;s++)
 	        					{
 	        						String anno2 = anno[2] +"|"+split_men[s];
-		        					GNormPlus.BioCDocobj.Annotations.get(i).get(j).add(anno[0]+"\t"+anno[1]+"\t"+anno2+"\t"+anno[3]+"\t"+anno[4]);
+		        					data.getBioCDocobj().Annotations.get(i).get(j).add(anno[0]+"\t"+anno[1]+"\t"+anno2+"\t"+anno[3]+"\t"+anno[4]);
 		        				}
 	        				}
 	        				else if(anno.length<5)
@@ -1409,7 +1416,7 @@ public class SimConcept
 	        					for(int s=0;s<split_men.length;s++)
 	        					{
 	        						String anno2 = anno[2] +"|"+split_men[s];
-		        					GNormPlus.BioCDocobj.Annotations.get(i).get(j).add(anno[0]+"\t"+anno[1]+"\t"+anno2+"\t"+anno[3]);
+		        					data.getBioCDocobj().Annotations.get(i).get(j).add(anno[0]+"\t"+anno[1]+"\t"+anno2+"\t"+anno[3]);
 	        					}
 	        				}
 	        			}
@@ -1418,11 +1425,11 @@ public class SimConcept
 	        				if(anno.length==5)
 	        				{
 	        					String anno2 = anno[2] +"|"+Output_Split_mention.get(MNoSpace);
-	        					GNormPlus.BioCDocobj.Annotations.get(i).get(j).set(k, anno[0]+"\t"+anno[1]+"\t"+anno2+"\t"+anno[3]+"\t"+anno[4]);
+	        					data.getBioCDocobj().Annotations.get(i).get(j).set(k, anno[0]+"\t"+anno[1]+"\t"+anno2+"\t"+anno[3]+"\t"+anno[4]);
 	        				}
 	        				else if(anno.length<5)
 	        				{
-	        					GNormPlus.BioCDocobj.Annotations.get(i).get(j).set(k, anno[0]+"\t"+anno[1]+"\t"+anno[2]+"\t"+anno[3]);
+	        					data.getBioCDocobj().Annotations.get(i).get(j).set(k, anno[0]+"\t"+anno[1]+"\t"+anno[2]+"\t"+anno[3]);
 	        				}
 	        			} 
 	        		}
@@ -1433,14 +1440,14 @@ public class SimConcept
 		/**
 		 * suffixprefix_orig2modified
 		 */
-		for (int i = 0; i < GNormPlus.BioCDocobj.Annotations.size(); i++)
+		for (int i = 0; i < data.getBioCDocobj().Annotations.size(); i++)
 		{
-			for (int j = 0; j < GNormPlus.BioCDocobj.Annotations.get(i).size(); j++)
+			for (int j = 0; j < data.getBioCDocobj().Annotations.get(i).size(); j++)
 			{
-				int Annotation_Num = GNormPlus.BioCDocobj.Annotations.get(i).get(j).size();
+				int Annotation_Num = data.getBioCDocobj().Annotations.get(i).get(j).size();
 				for (int k = 0; k < Annotation_Num ; k++)   // k : Annotations
 				{
-					String anno[]=GNormPlus.BioCDocobj.Annotations.get(i).get(j).get(k).split("\\t"); //Mention
+					String anno[]=data.getBioCDocobj().Annotations.get(i).get(j).get(k).split("\\t"); //Mention
 					String MenArr[]=anno[2].split("\\|");
 					ArrayList <String> Mentions = new ArrayList<String>();
 					for(int m=0;m<MenArr.length;m++)
@@ -1471,11 +1478,11 @@ public class SimConcept
 					}
 					if(anno.length==5)
     				{
-    					GNormPlus.BioCDocobj.Annotations.get(i).get(j).set(k, anno[0]+"\t"+anno[1]+"\t"+mens+"\t"+anno[3]+"\t"+anno[4]);
+    					data.getBioCDocobj().Annotations.get(i).get(j).set(k, anno[0]+"\t"+anno[1]+"\t"+mens+"\t"+anno[3]+"\t"+anno[4]);
     				}
     				else if(anno.length<5)
     				{
-    					GNormPlus.BioCDocobj.Annotations.get(i).get(j).set(k, anno[0]+"\t"+anno[1]+"\t"+mens+"\t"+anno[3]);
+    					data.getBioCDocobj().Annotations.get(i).get(j).set(k, anno[0]+"\t"+anno[1]+"\t"+mens+"\t"+anno[3]);
     				}
 				}
 			}
@@ -1484,14 +1491,14 @@ public class SimConcept
 		/*
 		// 2 --> ii
 		// ii --> 2
-		for (int i = 0; i < GNormPlus.BioCDocobj.Annotations.size(); i++)
+		for (int i = 0; i < data.getBioCDocobj().Annotations.size(); i++)
 		{
-			for (int j = 0; j < GNormPlus.BioCDocobj.Annotations.get(i).size(); j++)
+			for (int j = 0; j < data.getBioCDocobj().Annotations.get(i).size(); j++)
 			{
-				int Annotation_Num = GNormPlus.BioCDocobj.Annotations.get(i).get(j).size();
+				int Annotation_Num = data.getBioCDocobj().Annotations.get(i).get(j).size();
 				for (int k = 0; k < Annotation_Num ; k++)   // k : Annotations
 				{
-					String anno[]=GNormPlus.BioCDocobj.Annotations.get(i).get(j).get(k).split("\\t"); //Mention
+					String anno[]=data.getBioCDocobj().Annotations.get(i).get(j).get(k).split("\\t"); //Mention
 					String MenArr[]=anno[2].split("\\|");
 					HashMap<String,String> Mentions = new HashMap<String,String>();
 					for(int m=0;m<MenArr.length;m++)
@@ -1519,6 +1526,6 @@ public class SimConcept
 			}
 		}
 		*/
-		GNormPlus.BioCDocobj.BioCOutput(Filename,FilenameBioC,GNormPlus.BioCDocobj.Annotations,false);
+		data.getBioCDocobj().BioCOutput(Filename,FilenameBioC,data.getBioCDocobj().Annotations,false);
 	}
 }

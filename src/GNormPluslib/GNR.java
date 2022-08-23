@@ -19,6 +19,13 @@ import GNormPluslib.BioCDoc;
 
 public class GNR 
 {
+	private GNPProcessingData data;
+
+	public GNR(GNPProcessingData data) {
+
+		this.data = data;
+	}
+
 	/*
 	 * Read BioC files
 	 */
@@ -28,13 +35,13 @@ public class GNR
 		//BioC -> Abb input
 		String line="";
 		BufferedWriter FileAbb = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(FilenameAbb), "UTF-8"));
-		for (int i = 0; i < GNormPlus.BioCDocobj.PMIDs.size(); i++)
+		for (int i = 0; i < data.getBioCDocobj().PMIDs.size(); i++)
 		{
-			String Pmid = GNormPlus.BioCDocobj.PMIDs.get(i);
+			String Pmid = data.getBioCDocobj().PMIDs.get(i);
 			String Context="";
-			for (int j = 0; j < GNormPlus.BioCDocobj.PassageNames.get(i).size(); j++)
+			for (int j = 0; j < data.getBioCDocobj().PassageNames.get(i).size(); j++)
 			{
-				Context = Context+GNormPlus.BioCDocobj.PassageContexts.get(i).get(j)+" ";
+				Context = Context+data.getBioCDocobj().PassageContexts.get(i).get(j)+" ";
 			}
 			FileAbb.write(Pmid+"\n"+Context+"\n\n");
 		}
@@ -108,11 +115,11 @@ public class GNR
 		/** Read BioC file */
 		if(TrainTest.equals("Train"))
 		{
-			GNormPlus.BioCDocobj.BioCReaderWithAnnotation(Filename);
+			data.getBioCDocobj().BioCReaderWithAnnotation(Filename);
 		}
 		else
 		{
-			GNormPlus.BioCDocobj.BioCReader(Filename);
+			data.getBioCDocobj().BioCReader(Filename);
 		}
 		
 		
@@ -120,14 +127,14 @@ public class GNR
 		//BioC -> Abb input
 		String line="";
 		BufferedWriter FileAbb = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(FilenameAbb), "UTF-8"));
-		for (int i = 0; i < GNormPlus.BioCDocobj.PMIDs.size(); i++)
+		for (int i = 0; i < data.getBioCDocobj().PMIDs.size(); i++)
 		{
-			String Pmid = GNormPlus.BioCDocobj.PMIDs.get(i);
+			String Pmid = data.getBioCDocobj().PMIDs.get(i);
 			String Context="";
-			for (int j = 0; j < GNormPlus.BioCDocobj.PassageNames.get(i).size(); j++)
+			for (int j = 0; j < data.getBioCDocobj().PassageNames.get(i).size(); j++)
 			{
 				Pattern pattern = Pattern.compile("\\(");
-				Matcher matcher = pattern.matcher(GNormPlus.BioCDocobj.PassageContexts.get(i).get(j));
+				Matcher matcher = pattern.matcher(data.getBioCDocobj().PassageContexts.get(i).get(j));
 				int count = 0;
 				while (matcher.find()) 
 				{
@@ -135,7 +142,7 @@ public class GNR
 				}
 				if(count<400)
 				{
-					Context = Context+GNormPlus.BioCDocobj.PassageContexts.get(i).get(j)+" ";
+					Context = Context+data.getBioCDocobj().PassageContexts.get(i).get(j)+" ";
 				}
 			}
 			FileAbb.write(Pmid+"\n"+Context+"\n\n");
@@ -218,17 +225,17 @@ public class GNR
 			//NLP modules
 			SnowballStemmer stemmer = new englishStemmer();
 			/** PMIDs : i */
-			for (int i = 0; i < GNormPlus.BioCDocobj.PMIDs.size(); i++)
+			for (int i = 0; i < data.getBioCDocobj().PMIDs.size(); i++)
 			{
-				String Pmid = GNormPlus.BioCDocobj.PMIDs.get(i);
+				String Pmid = data.getBioCDocobj().PMIDs.get(i);
 				
 				/** Paragraphs : j */
-				for (int j = 0; j < GNormPlus.BioCDocobj.PassageNames.get(i).size(); j++)
+				for (int j = 0; j < data.getBioCDocobj().PassageNames.get(i).size(); j++)
 				{
-					String PassageName= GNormPlus.BioCDocobj.PassageNames.get(i).get(j); // Passage name
-					int PassageOffset = GNormPlus.BioCDocobj.PassageOffsets.get(i).get(j); // Passage offset
-					String PassageContext = GNormPlus.BioCDocobj.PassageContexts.get(i).get(j); // Passage context
-					ArrayList<String> Annotation = GNormPlus.BioCDocobj.Annotations.get(i).get(j); // Annotation
+					String PassageName= data.getBioCDocobj().PassageNames.get(i).get(j); // Passage name
+					int PassageOffset = data.getBioCDocobj().PassageOffsets.get(i).get(j); // Passage offset
+					String PassageContext = data.getBioCDocobj().PassageContexts.get(i).get(j); // Passage context
+					ArrayList<String> Annotation = data.getBioCDocobj().Annotations.get(i).get(j); // Annotation
 					HashMap<Integer, String> CTDGene_hash = new HashMap<Integer, String>();
 					HashMap<Integer, String> FamilyName_hash = new HashMap<Integer, String>();
 					HashMap<Integer, String> character_hash = new HashMap<Integer, String>();
@@ -753,7 +760,7 @@ public class GNR
 		Pattern pat_IE = Pattern.compile("((FamilyName|DomainMotif|Gene)_[IE])$");
 		ArrayList<ArrayList<String>> AnnotationInPMID = new ArrayList(); // array of Annotations in the PMIDs
 		ArrayList<String> AnnotationInPassage= new ArrayList<String>(); // array of Annotations in the Passage
-		GNormPlus.BioCDocobj.Annotations = new ArrayList();
+		data.getBioCDocobj().Annotations = new ArrayList();
 		int countPMID=0;
 		int countPassage=0;
 		/** outputArr */
@@ -780,7 +787,7 @@ public class GNR
 			}
 			if( (!pmid_last.equals("")) && (!pmid.equals(pmid_last)) )
 			{
-				GNormPlus.BioCDocobj.Annotations.add(AnnotationInPMID);
+				data.getBioCDocobj().Annotations.add(AnnotationInPMID);
 				AnnotationInPMID = new ArrayList();
 				countPMID++;
 				countPassage=0;
@@ -816,7 +823,7 @@ public class GNR
 			
 			if(F == true)
 			{
-				String PassageContext = GNormPlus.BioCDocobj.PassageContexts.get(countPMID).get(countPassage); // Passage context
+				String PassageContext = data.getBioCDocobj().PassageContexts.get(countPMID).get(countPassage); // Passage context
 				String Mention = PassageContext.substring(start, last); 
 				String Mention_nospace = Mention.replaceAll("[\\W\\-\\_]", ""); 
 				if(Mention.toLowerCase().matches("(figure|tables|fig|tab|exp\\. [0-9]+).*")){}
@@ -838,9 +845,9 @@ public class GNR
 			pmid_last=pmid;
 		}// outputArr1
 		AnnotationInPMID.add(AnnotationInPassage);
-		GNormPlus.BioCDocobj.Annotations.add(AnnotationInPMID);
+		data.getBioCDocobj().Annotations.add(AnnotationInPMID);
 		
-		//GNormPlus.BioCDocobj.BioCOutput(Filename,FilenameBioC,GNormPlus.BioCDocobj.Annotations,false); //save in BioC file
+		//data.getBioCDocobj().BioCOutput(Filename,FilenameBioC,data.getBioCDocobj().Annotations,false); //save in BioC file
 	}
 	
 	public void ReadCRFresult(String Filename,String FilenameLoca,String FilenameOutput,String FilenameBioC,double threshold,double threshold_GeneType) throws XMLStreamException, IOException
@@ -902,7 +909,7 @@ public class GNR
 		Pattern pat_IE = Pattern.compile("((FamilyName|DomainMotif|Gene)_[IE])$");
 		ArrayList<ArrayList<String>> AnnotationInPMID = new ArrayList(); // array of Annotations in the PMIDs
 		ArrayList<String> AnnotationInPassage= new ArrayList<String>(); // array of Annotations in the Passage
-		GNormPlus.BioCDocobj.Annotations = new ArrayList();
+		data.getBioCDocobj().Annotations = new ArrayList();
 		int countPMID=0;
 		int countPassage=0;
 		/** outputArr1 */
@@ -956,14 +963,14 @@ public class GNR
 			{
 				AnnotationInPMID.add(AnnotationInPassage);
 				AnnotationInPassage = new ArrayList<String>();
-				GNormPlus.BioCDocobj.Annotations.add(AnnotationInPMID);
+				data.getBioCDocobj().Annotations.add(AnnotationInPMID);
 				AnnotationInPMID = new ArrayList();
 				countPMID++;
 				countPassage=0;
 			}
 			else if( (!pmid_last.equals("")) && (!pmid.equals(pmid_last)) ) // pmid change
 			{
-				GNormPlus.BioCDocobj.Annotations.add(AnnotationInPMID);
+				data.getBioCDocobj().Annotations.add(AnnotationInPMID);
 				AnnotationInPMID = new ArrayList();
 				countPMID++;
 				countPassage=0;
@@ -971,9 +978,9 @@ public class GNR
 			
 			if(F == true)
 			{
-				if(GNormPlus.BioCDocobj.PassageContexts.size()>countPMID && GNormPlus.BioCDocobj.PassageContexts.get(countPMID).size()>countPassage && GNormPlus.BioCDocobj.PassageContexts.get(countPMID).get(countPassage).length()>=last && (last-start)<1000)
+				if(data.getBioCDocobj().PassageContexts.size()>countPMID && data.getBioCDocobj().PassageContexts.get(countPMID).size()>countPassage && data.getBioCDocobj().PassageContexts.get(countPMID).get(countPassage).length()>=last && (last-start)<1000)
 				{
-					String PassageContext = GNormPlus.BioCDocobj.PassageContexts.get(countPMID).get(countPassage); // Passage context
+					String PassageContext = data.getBioCDocobj().PassageContexts.get(countPMID).get(countPassage); // Passage context
 					String Mention = PassageContext.substring(start, last); 
 					String Mention_nospace = Mention.replaceAll("[\\W\\-\\_]", ""); 
 					if(Mention.toLowerCase().matches("(figure|tables|fig|tab|exp\\. [0-9]+).*")){}
@@ -999,7 +1006,7 @@ public class GNR
 			pmid_last=pmid;
 		}// outputArr1
 		AnnotationInPMID.add(AnnotationInPassage);
-		GNormPlus.BioCDocobj.Annotations.add(AnnotationInPMID);
+		data.getBioCDocobj().Annotations.add(AnnotationInPMID);
 		
 		/** outputArr2 */
 		pmid_last="";
@@ -1066,9 +1073,9 @@ public class GNR
 			
 			if(F == true)
 			{
-				if(GNormPlus.BioCDocobj.PassageContexts.size()>countPMID && GNormPlus.BioCDocobj.PassageContexts.get(countPMID).size()>countPassage && GNormPlus.BioCDocobj.PassageContexts.get(countPMID).get(countPassage).length()>=last && (last-start)<1000)
+				if(data.getBioCDocobj().PassageContexts.size()>countPMID && data.getBioCDocobj().PassageContexts.get(countPMID).size()>countPassage && data.getBioCDocobj().PassageContexts.get(countPMID).get(countPassage).length()>=last && (last-start)<1000)
 				{
-					String PassageContext = GNormPlus.BioCDocobj.PassageContexts.get(countPMID).get(countPassage); // Passage context
+					String PassageContext = data.getBioCDocobj().PassageContexts.get(countPMID).get(countPassage); // Passage context
 					String Mention = PassageContext.substring(start, last); 
 					String Mention_nospace = Mention.replaceAll("[\\W\\-\\_]", ""); 
 					if(Mention.toLowerCase().matches("(figure|tables|fig|tab|exp\\. [0-9]+).*")){}
@@ -1086,15 +1093,15 @@ public class GNR
 					else if(Double.parseDouble(outputArr2_score.get(i))>threshold)
 					{
 						boolean overlap=false;
-						for(int j=0;j<GNormPlus.BioCDocobj.Annotations.get(countPMID).get(countPassage).size();j++)
+						for(int j=0;j<data.getBioCDocobj().Annotations.get(countPMID).get(countPassage).size();j++)
 						{
-							String GetData[]=GNormPlus.BioCDocobj.Annotations.get(countPMID).get(countPassage).get(j).split("\t");
+							String GetData[]=data.getBioCDocobj().Annotations.get(countPMID).get(countPassage).get(j).split("\t");
 							int startj=Integer.parseInt(GetData[0]);
 							int lastj=Integer.parseInt(GetData[1]);
 							String Mention_tmp = Mention.replaceAll("([^A-Za-z0-9@ ])", "\\\\$1");
-							if(MentionType.equals("Gene") && Double.parseDouble(outputArr2_score.get(i))>threshold_GeneType && GNormPlus.BioCDocobj.Annotations.get(countPMID).get(countPassage).get(j).matches(start+"\t"+last+"\t"+Mention_tmp+"\t(FamilyName|DomainMotif)") )
+							if(MentionType.equals("Gene") && Double.parseDouble(outputArr2_score.get(i))>threshold_GeneType && data.getBioCDocobj().Annotations.get(countPMID).get(countPassage).get(j).matches(start+"\t"+last+"\t"+Mention_tmp+"\t(FamilyName|DomainMotif)") )
 							{
-								GNormPlus.BioCDocobj.Annotations.get(countPMID).get(countPassage).set(j, start+"\t"+last+"\t"+Mention+"\t"+MentionType);
+								data.getBioCDocobj().Annotations.get(countPMID).get(countPassage).set(j, start+"\t"+last+"\t"+Mention+"\t"+MentionType);
 							}
 							else if( (start>=startj && start<lastj) || (last>startj && last<=lastj) )
 							{
@@ -1103,7 +1110,7 @@ public class GNR
 						}
 						if(overlap == false)
 						{
-							GNormPlus.BioCDocobj.Annotations.get(countPMID).get(countPassage).add(start+"\t"+last+"\t"+Mention+"\t"+MentionType);
+							data.getBioCDocobj().Annotations.get(countPMID).get(countPassage).add(start+"\t"+last+"\t"+Mention+"\t"+MentionType);
 						}
 					}
 				}
@@ -1180,9 +1187,9 @@ public class GNR
 			
 			if(F == true)
 			{
-				if(GNormPlus.BioCDocobj.PassageContexts.size()>countPMID && GNormPlus.BioCDocobj.PassageContexts.get(countPMID).size()>countPassage && GNormPlus.BioCDocobj.PassageContexts.get(countPMID).get(countPassage).length()>=last && (last-start)<1000)
+				if(data.getBioCDocobj().PassageContexts.size()>countPMID && data.getBioCDocobj().PassageContexts.get(countPMID).size()>countPassage && data.getBioCDocobj().PassageContexts.get(countPMID).get(countPassage).length()>=last && (last-start)<1000)
 				{
-					String PassageContext = GNormPlus.BioCDocobj.PassageContexts.get(countPMID).get(countPassage); // Passage context
+					String PassageContext = data.getBioCDocobj().PassageContexts.get(countPMID).get(countPassage); // Passage context
 					String Mention = PassageContext.substring(start, last); 
 					String Mention_nospace = Mention.replaceAll("[\\W\\-\\_]", ""); 
 					if(Mention.toLowerCase().matches("(figure|tables|fig|tab|exp\\. [0-9]+).*")){}
@@ -1200,15 +1207,15 @@ public class GNR
 					else if(Double.parseDouble(outputArr3_score.get(i))>threshold)
 					{
 						boolean overlap=false;
-						for(int j=0;j<GNormPlus.BioCDocobj.Annotations.get(countPMID).get(countPassage).size();j++)
+						for(int j=0;j<data.getBioCDocobj().Annotations.get(countPMID).get(countPassage).size();j++)
 						{
-							String GetData[]=GNormPlus.BioCDocobj.Annotations.get(countPMID).get(countPassage).get(j).split("\t");
+							String GetData[]=data.getBioCDocobj().Annotations.get(countPMID).get(countPassage).get(j).split("\t");
 							int startj=Integer.parseInt(GetData[0]);
 							int lastj=Integer.parseInt(GetData[1]);
 							String Mention_tmp = Mention.replaceAll("([^A-Za-z0-9@ ])", "\\\\$1");
-							if(MentionType.equals("Gene") && Double.parseDouble(outputArr3_score.get(i))>threshold_GeneType && GNormPlus.BioCDocobj.Annotations.get(countPMID).get(countPassage).get(j).matches(start+"\t"+last+"\t"+Mention_tmp+"\t(FamilyName|DomainMotif)") )
+							if(MentionType.equals("Gene") && Double.parseDouble(outputArr3_score.get(i))>threshold_GeneType && data.getBioCDocobj().Annotations.get(countPMID).get(countPassage).get(j).matches(start+"\t"+last+"\t"+Mention_tmp+"\t(FamilyName|DomainMotif)") )
 							{
-								GNormPlus.BioCDocobj.Annotations.get(countPMID).get(countPassage).set(j, start+"\t"+last+"\t"+Mention+"\t"+MentionType);
+								data.getBioCDocobj().Annotations.get(countPMID).get(countPassage).set(j, start+"\t"+last+"\t"+Mention+"\t"+MentionType);
 							}
 							else if( (start>=startj && start<lastj) || (last>startj && last<=lastj) )
 							{
@@ -1217,7 +1224,7 @@ public class GNR
 						}
 						if(overlap == false)
 						{
-							GNormPlus.BioCDocobj.Annotations.get(countPMID).get(countPassage).add(start+"\t"+last+"\t"+Mention+"\t"+MentionType);
+							data.getBioCDocobj().Annotations.get(countPMID).get(countPassage).add(start+"\t"+last+"\t"+Mention+"\t"+MentionType);
 						}
 					}
 				}
@@ -1228,7 +1235,7 @@ public class GNR
 			pmid_last=pmid;
 		}// outputArr3
 		
-		//GNormPlus.BioCDocobj.BioCOutput(Filename,FilenameBioC,GNormPlus.BioCDocobj.Annotations,false); //save in BioC file
+		//data.getBioCDocobj().BioCOutput(Filename,FilenameBioC,data.getBioCDocobj().Annotations,false); //save in BioC file
 	}
 	
 	public void PostProcessing(String Filename,String FilenameBioC) throws XMLStreamException, IOException
@@ -1243,20 +1250,20 @@ public class GNR
 		String Strain_Suffix="alpha|beta|gamma|kappa|theta|delta|[A-Ga-g0-9]";
 		ArrayList<String> Translate2Family = new ArrayList<String>();
 		
-		for(int i=0;i<GNormPlus.BioCDocobj.Annotations.size();i++) // PMID
+		for(int i=0;i<data.getBioCDocobj().Annotations.size();i++) // PMID
 		{
 			/** Pre-processing of  Mention type refinement */
 			HashMap<String, String> Mention2Type_Hash = new HashMap<String, String>(); // for substring detection - Extract all mentions in the target PMID : MentionList
 			ArrayList<String> GeneMentionPattern = new ArrayList<String>(); // pattern match to extend Gene
 			HashMap<String, Integer> MentionType2Num = new HashMap<String, Integer>(); // for frequency calculation
-			if(GNormPlus.BioCDocobj.PMIDs.size()>=i)
+			if(data.getBioCDocobj().PMIDs.size()>=i)
 			{
-				String pmid=GNormPlus.BioCDocobj.PMIDs.get(i);
-				for(int j=0;j<GNormPlus.BioCDocobj.Annotations.get(i).size();j++) // Paragraph
+				String pmid=data.getBioCDocobj().PMIDs.get(i);
+				for(int j=0;j<data.getBioCDocobj().Annotations.get(i).size();j++) // Paragraph
 				{	
-					for(int k=0;k<GNormPlus.BioCDocobj.Annotations.get(i).get(j).size();k++) // Annotation
+					for(int k=0;k<data.getBioCDocobj().Annotations.get(i).get(j).size();k++) // Annotation
 					{
-						String Anno[] = GNormPlus.BioCDocobj.Annotations.get(i).get(j).get(k).split("\\t");
+						String Anno[] = data.getBioCDocobj().Annotations.get(i).get(j).get(k).split("\\t");
 						String start = Anno[0];
 						String last = Anno[1];
 						String mention = Anno[2];
@@ -1314,12 +1321,12 @@ public class GNR
 					}
 				}
 							
-				for(int j=0;j<GNormPlus.BioCDocobj.Annotations.get(i).size();j++) // Paragraph
+				for(int j=0;j<data.getBioCDocobj().Annotations.get(i).size();j++) // Paragraph
 				{
 					ArrayList<Integer> RemoveList = new ArrayList<Integer>();
-					for(int k=0;k<GNormPlus.BioCDocobj.Annotations.get(i).get(j).size();k++) // Annotation
+					for(int k=0;k<data.getBioCDocobj().Annotations.get(i).get(j).size();k++) // Annotation
 					{
-						String Anno[] = GNormPlus.BioCDocobj.Annotations.get(i).get(j).get(k).split("\\t");
+						String Anno[] = data.getBioCDocobj().Annotations.get(i).get(j).get(k).split("\\t");
 						String start = Anno[0];
 						String last = Anno[1];
 						String mention = Anno[2];
@@ -1337,14 +1344,14 @@ public class GNR
 						{
 							if((!men.equals(mention.toLowerCase())) && men.matches(mention_tmp+"[\\W\\-\\_]*("+Strain_Suffix+")"))
 							{
-								GNormPlus.BioCDocobj.Annotations.get(i).get(j).set(k, start+"\t"+last+"\t"+mention+"\tFamilyName");
-								if(GNormPlus.PmidLF2Abb_lc_hash.containsKey(GNormPlus.BioCDocobj.PMIDs.get(i)+"\t"+mention.toLowerCase()))
+								data.getBioCDocobj().Annotations.get(i).get(j).set(k, start+"\t"+last+"\t"+mention+"\tFamilyName");
+								if(GNormPlus.PmidLF2Abb_lc_hash.containsKey(data.getBioCDocobj().PMIDs.get(i)+"\t"+mention.toLowerCase()))
 								{
-									Translate2Family.add(GNormPlus.PmidLF2Abb_lc_hash.get(GNormPlus.BioCDocobj.PMIDs.get(i)+"\t"+mention.toLowerCase()));
+									Translate2Family.add(GNormPlus.PmidLF2Abb_lc_hash.get(data.getBioCDocobj().PMIDs.get(i)+"\t"+mention.toLowerCase()));
 								}
-								else if(GNormPlus.PmidAbb2LF_lc_hash.containsKey(GNormPlus.BioCDocobj.PMIDs.get(i)+"\t"+mention.toLowerCase()))
+								else if(GNormPlus.PmidAbb2LF_lc_hash.containsKey(data.getBioCDocobj().PMIDs.get(i)+"\t"+mention.toLowerCase()))
 								{
-									Translate2Family.add(GNormPlus.PmidAbb2LF_lc_hash.get(GNormPlus.BioCDocobj.PMIDs.get(i)+"\t"+mention.toLowerCase()));
+									Translate2Family.add(GNormPlus.PmidAbb2LF_lc_hash.get(data.getBioCDocobj().PMIDs.get(i)+"\t"+mention.toLowerCase()));
 								}
 								SubSt=true;
 								break;
@@ -1354,37 +1361,37 @@ public class GNR
 						if(SubSt == false)
 						{
 							int BoundaryLen=15;
-							if(GNormPlus.BioCDocobj.PassageContexts.get(i).get(j).length()<Integer.parseInt(last)+15)
+							if(data.getBioCDocobj().PassageContexts.get(i).get(j).length()<Integer.parseInt(last)+15)
 							{
-								BoundaryLen=GNormPlus.BioCDocobj.PassageContexts.get(i).get(j).length()-Integer.parseInt(last);
+								BoundaryLen=data.getBioCDocobj().PassageContexts.get(i).get(j).length()-Integer.parseInt(last);
 							}
 							String SurroundingString="";
 							if(BoundaryLen<=0){}
-							else if (GNormPlus.BioCDocobj.PassageContexts.get(i).get(j).length()<Integer.parseInt(last)+BoundaryLen)
+							else if (data.getBioCDocobj().PassageContexts.get(i).get(j).length()<Integer.parseInt(last)+BoundaryLen)
 							{
-								BoundaryLen=GNormPlus.BioCDocobj.PassageContexts.get(i).get(j).length()-Integer.parseInt(last)-1;
-								SurroundingString = GNormPlus.BioCDocobj.PassageContexts.get(i).get(j).substring(Integer.parseInt(last),Integer.parseInt(last)+BoundaryLen).toLowerCase();
+								BoundaryLen=data.getBioCDocobj().PassageContexts.get(i).get(j).length()-Integer.parseInt(last)-1;
+								SurroundingString = data.getBioCDocobj().PassageContexts.get(i).get(j).substring(Integer.parseInt(last),Integer.parseInt(last)+BoundaryLen).toLowerCase();
 							}
 							else
 							{
-								SurroundingString = GNormPlus.BioCDocobj.PassageContexts.get(i).get(j).substring(Integer.parseInt(last),Integer.parseInt(last)+BoundaryLen).toLowerCase();
+								SurroundingString = data.getBioCDocobj().PassageContexts.get(i).get(j).substring(Integer.parseInt(last),Integer.parseInt(last)+BoundaryLen).toLowerCase();
 							}
 
 							/* 2. Check suffix and surrounding words - Gene -> Family/Domain/Cell */
 							if( mention.toLowerCase().matches(".*("+Cell_Suffix+")") ||	SurroundingString.matches("("+Cell_Suffix+")")	)
 							{
 								type="Cell";
-								GNormPlus.BioCDocobj.Annotations.get(i).get(j).set(k, start+"\t"+last+"\t"+mention+"\t"+type);
+								data.getBioCDocobj().Annotations.get(i).get(j).set(k, start+"\t"+last+"\t"+mention+"\t"+type);
 							}
 							else if( mention.toLowerCase().matches(".*("+FamilyName_Suffix+")") || SurroundingString.matches("("+FamilyName_Suffix+")")	)
 							{
 								type="FamilyName";
-								GNormPlus.BioCDocobj.Annotations.get(i).get(j).set(k, start+"\t"+last+"\t"+mention+"\t"+type);
+								data.getBioCDocobj().Annotations.get(i).get(j).set(k, start+"\t"+last+"\t"+mention+"\t"+type);
 							}
 							else if( mention.toLowerCase().matches(".*("+DomainMotif_Suffix+")")|| SurroundingString.matches("("+DomainMotif_Suffix+")")	)
 							{
 								type="DomainMotif";
-								GNormPlus.BioCDocobj.Annotations.get(i).get(j).set(k, start+"\t"+last+"\t"+mention+"\t"+type);
+								data.getBioCDocobj().Annotations.get(i).get(j).set(k, start+"\t"+last+"\t"+mention+"\t"+type);
 							}
 							else if(!type.equals("Gene"))
 							{
@@ -1409,7 +1416,7 @@ public class GNR
 								}
 								if(Num_Gene/(Num_FDC+Num_Gene)>=0.5)
 								{
-									GNormPlus.BioCDocobj.Annotations.get(i).get(j).set(k, start+"\t"+last+"\t"+mention+"\tGene");
+									data.getBioCDocobj().Annotations.get(i).get(j).set(k, start+"\t"+last+"\t"+mention+"\tGene");
 								}
 								
 								/* 4. Extend Genes to Family/Domain mentions by pattern match - Family/Domain/Cell -> Gene */
@@ -1417,7 +1424,7 @@ public class GNR
 								{
 									if(mention.toLowerCase().matches(GeneMentionPattern.get(p)))
 									{
-										GNormPlus.BioCDocobj.Annotations.get(i).get(j).set(k, start+"\t"+last+"\t"+mention+"\tGene");
+										data.getBioCDocobj().Annotations.get(i).get(j).set(k, start+"\t"+last+"\t"+mention+"\tGene");
 									}
 								}
 							}
@@ -1438,15 +1445,15 @@ public class GNR
 								}
 								else if(GNormPlus.PmidAbb2LF_lc_hash.get(pmid+"\t"+lc_ment).matches(".*("+Cell_Suffix+")"))
 								{
-									//GNormPlus.BioCDocobj.Annotations.get(i).get(j).set(k, Anno[0]+"\t"+Anno[1]+"\tCell");
+									//data.getBioCDocobj().Annotations.get(i).get(j).set(k, Anno[0]+"\t"+Anno[1]+"\tCell");
 								}
 								else if(GNormPlus.PmidAbb2LF_lc_hash.get(pmid+"\t"+lc_ment).matches(".*("+FamilyName_Suffix+")") && !lc_ment.matches(".+[a-z][0-9][a-z]")) //AtRPA1a in pmid:19153602
 								{
-									GNormPlus.BioCDocobj.Annotations.get(i).get(j).set(k, start+"\t"+last+"\t"+mention+"\tFamilyName");
+									data.getBioCDocobj().Annotations.get(i).get(j).set(k, start+"\t"+last+"\t"+mention+"\tFamilyName");
 								}
 								else if(GNormPlus.PmidAbb2LF_lc_hash.get(pmid+"\t"+lc_ment).matches(".*("+DomainMotif_Suffix+")"))
 								{
-									GNormPlus.BioCDocobj.Annotations.get(i).get(j).set(k, start+"\t"+last+"\t"+mention+"\tDomainMotif");
+									data.getBioCDocobj().Annotations.get(i).get(j).set(k, start+"\t"+last+"\t"+mention+"\tDomainMotif");
 								}
 								else
 								{
@@ -1455,7 +1462,7 @@ public class GNR
 									&& !(type.equals("Gene"))
 									) // if Long Form is recognized as a Gene, and Abb is recognized as not a Gene
 									{
-										GNormPlus.BioCDocobj.Annotations.get(i).get(j).set(k, start+"\t"+last+"\t"+mention+"\tGene");
+										data.getBioCDocobj().Annotations.get(i).get(j).set(k, start+"\t"+last+"\t"+mention+"\tGene");
 									}
 								}
 							}
@@ -1463,14 +1470,14 @@ public class GNR
 					}
 				}
 				
-				for(int j=0;j<GNormPlus.BioCDocobj.Annotations.get(i).size();j++) // Paragraph
+				for(int j=0;j<data.getBioCDocobj().Annotations.get(i).size();j++) // Paragraph
 				{
-					for(int k=0;k<GNormPlus.BioCDocobj.Annotations.get(i).get(j).size();k++) // Annotation
+					for(int k=0;k<data.getBioCDocobj().Annotations.get(i).get(j).size();k++) // Annotation
 					{
-						String Anno[] = GNormPlus.BioCDocobj.Annotations.get(i).get(j).get(k).split("\\t");
+						String Anno[] = data.getBioCDocobj().Annotations.get(i).get(j).get(k).split("\\t");
 						if(Translate2Family.contains(Anno[2].toLowerCase()))
 						{
-							GNormPlus.BioCDocobj.Annotations.get(i).get(j).set(k, Anno[0]+"\t"+Anno[1]+"\t"+Anno[2]+"\tFamilyName");
+							data.getBioCDocobj().Annotations.get(i).get(j).set(k, Anno[0]+"\t"+Anno[1]+"\t"+Anno[2]+"\tFamilyName");
 						}
 					}
 				}
@@ -1478,11 +1485,11 @@ public class GNR
 				//ArrayList<String> GeneMentionPattern = new ArrayList<String>(); // pattern match to extend Gene
 				HashMap<String,String> GeneMentions = new HashMap<String,String>(); // Extending Gene mentions
 				HashMap<String,String> GeneMentionLocationGNR = new HashMap<String,String>(); // Extending Gene mentions
-				for(int j=0;j<GNormPlus.BioCDocobj.Annotations.get(i).size();j++) // Paragraph
+				for(int j=0;j<data.getBioCDocobj().Annotations.get(i).size();j++) // Paragraph
 				{
-					for(int k=0;k<GNormPlus.BioCDocobj.Annotations.get(i).get(j).size();k++) // Annotation
+					for(int k=0;k<data.getBioCDocobj().Annotations.get(i).get(j).size();k++) // Annotation
 					{
-						String Anno[] = GNormPlus.BioCDocobj.Annotations.get(i).get(j).get(k).split("\\t");
+						String Anno[] = data.getBioCDocobj().Annotations.get(i).get(j).get(k).split("\\t");
 						int start = Integer.parseInt(Anno[0]);
 						int last = Integer.parseInt(Anno[1]);
 						String mention = Anno[2];
@@ -1496,11 +1503,11 @@ public class GNR
 				}
 				
 				//Extend to all gene mentions
-				for(int j=0;j<GNormPlus.BioCDocobj.Annotations.get(i).size();j++) // Paragraph
+				for(int j=0;j<data.getBioCDocobj().Annotations.get(i).size();j++) // Paragraph
 				{
-					if(GNormPlus.BioCDocobj.PassageContexts.size()>i && GNormPlus.BioCDocobj.PassageContexts.get(i).size()>j)
+					if(data.getBioCDocobj().PassageContexts.size()>i && data.getBioCDocobj().PassageContexts.get(i).size()>j)
 					{
-						String PassageContexts = " " + GNormPlus.BioCDocobj.PassageContexts.get(i).get(j) + " ";
+						String PassageContexts = " " + data.getBioCDocobj().PassageContexts.get(i).get(j) + " ";
 						String PassageContexts_tmp = PassageContexts.toLowerCase();
 						for(String gm : GeneMentions.keySet())
 						{
@@ -1526,15 +1533,15 @@ public class GNR
 										String mention = PassageContexts.substring(start+1,last+1);
 										if(!GeneMentionLocationGNR.containsKey(j+"\t"+start) && !GeneMentionLocationGNR.containsKey(j+"\t"+last))
 										{
-											if(GNormPlus.BioCDocobj.Annotations.get(i).get(j).contains(start+"\t"+last+"\t"+mention+"\tFamilyName"))
+											if(data.getBioCDocobj().Annotations.get(i).get(j).contains(start+"\t"+last+"\t"+mention+"\tFamilyName"))
 											{
-												GNormPlus.BioCDocobj.Annotations.get(i).get(j).remove(start+"\t"+last+"\t"+mention+"\tFamilyName");
+												data.getBioCDocobj().Annotations.get(i).get(j).remove(start+"\t"+last+"\t"+mention+"\tFamilyName");
 											}
-											else if(GNormPlus.BioCDocobj.Annotations.get(i).get(j).contains(start+"\t"+last+"\t"+mention+"\tDomainMotif"))
+											else if(data.getBioCDocobj().Annotations.get(i).get(j).contains(start+"\t"+last+"\t"+mention+"\tDomainMotif"))
 											{
-												GNormPlus.BioCDocobj.Annotations.get(i).get(j).remove(start+"\t"+last+"\t"+mention+"\tDomainMotif");
+												data.getBioCDocobj().Annotations.get(i).get(j).remove(start+"\t"+last+"\t"+mention+"\tDomainMotif");
 											}
-											GNormPlus.BioCDocobj.Annotations.get(i).get(j).add(start+"\t"+last+"\t"+mention+"\tGene");
+											data.getBioCDocobj().Annotations.get(i).get(j).add(start+"\t"+last+"\t"+mention+"\tGene");
 										}
 										gmtmp = gmtmp.replaceAll(".", "X");
 										PassageContexts_tmp=pre+""+gmtmp+""+post;
@@ -1547,11 +1554,11 @@ public class GNR
 				}
 				
 				//Extend to all family mentions
-				for(int j=0;j<GNormPlus.BioCDocobj.Annotations.get(i).size();j++) // Paragraph
+				for(int j=0;j<data.getBioCDocobj().Annotations.get(i).size();j++) // Paragraph
 				{
-					if(GNormPlus.BioCDocobj.PassageContexts.size()>i && GNormPlus.BioCDocobj.PassageContexts.get(i).size()>j)
+					if(data.getBioCDocobj().PassageContexts.size()>i && data.getBioCDocobj().PassageContexts.get(i).size()>j)
 					{
-						String PassageContexts = " " + GNormPlus.BioCDocobj.PassageContexts.get(i).get(j) + " ";
+						String PassageContexts = " " + data.getBioCDocobj().PassageContexts.get(i).get(j) + " ";
 						String PassageContexts_tmp = PassageContexts.toLowerCase();
 						for(String gm : GeneMentions.keySet())
 						{
@@ -1575,9 +1582,9 @@ public class GNR
 										String mention = PassageContexts.substring(start+1,last+1);
 										if(!GeneMentionLocationGNR.containsKey(j+"\t"+start) && !GeneMentionLocationGNR.containsKey(j+"\t"+last))
 										{
-											if(!GNormPlus.BioCDocobj.Annotations.get(i).get(j).contains(start+"\t"+last+"\t"+mention+"\tGene"))
+											if(!data.getBioCDocobj().Annotations.get(i).get(j).contains(start+"\t"+last+"\t"+mention+"\tGene"))
 											{
-												GNormPlus.BioCDocobj.Annotations.get(i).get(j).add(start+"\t"+last+"\t"+mention+"\t"+type);
+												data.getBioCDocobj().Annotations.get(i).get(j).add(start+"\t"+last+"\t"+mention+"\t"+type);
 											}
 										}
 										gmtmp = gmtmp.replaceAll(".", "X");
@@ -1591,7 +1598,7 @@ public class GNR
 				}
 			}
 		}}
-		GNormPlus.BioCDocobj.BioCOutput(Filename,FilenameBioC,GNormPlus.BioCDocobj.Annotations,false); //save in BioC file
+		data.getBioCDocobj().BioCOutput(Filename,FilenameBioC,data.getBioCDocobj().Annotations,false); //save in BioC file
 	}
 }
 
