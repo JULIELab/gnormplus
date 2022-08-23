@@ -21,3 +21,32 @@
 
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
+
+# IntelliJ project files
+*.iml
+.idea/
+
+# all GNormPlus outside of the source directory
+bin
+CRF/
+Dictionary/
+input/
+output/
+lib/
+Library/
+out/
+output/
+Ab3P
+BioC.dtd
+DISCLAIMER
+GNormPlus.sh
+identify_abbr
+Installation.sh
+Makefile
+path_Ab3P
+readme.txt
+setup.9606.txt
+setup.SR.txt
+setup.txt
+SpeciesRecognition.sh
+tmBioC.key
