@@ -34,12 +34,6 @@ public class GNormPlus
 	public static HashMap<String, String> HomologeneID_hash = new HashMap<String, String>();
 	public static HashMap<String,String> SuffixTranslationMap_hash = new HashMap<String,String>();
 	public static HashMap<String,String> SuffixTranslationMap2_hash = new HashMap<String,String>();
-//	@Deprecated public static HashMap<String, String> Pmid2Abb_hash = new HashMap<String, String>();
-//	@Deprecated public static HashMap<String, String> PmidAbb2LF_lc_hash = new HashMap<String, String>();
-//	@Deprecated public static HashMap<String, String> PmidLF2Abb_lc_hash = new HashMap<String, String>();
-//	@Deprecated public static HashMap<String, String> PmidAbb2LF_hash = new HashMap<String, String>();
-//	@Deprecated public static HashMap<String, String> PmidLF2Abb_hash = new HashMap<String, String>();
-//	@Deprecated public static HashMap<String, String> Pmid2ChromosomeGene_hash = new HashMap<String, String>();
 	@Deprecated public static HashMap<String, String> SimConceptMention2Type_hash = new HashMap<String, String>();
 	public static HashMap<String, String> Filtering_hash = new HashMap<String, String>();
 	public static HashMap<String, String> Filtering_WithLongForm_hash = new HashMap<String, String>();
