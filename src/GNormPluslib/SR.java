@@ -5,15 +5,7 @@
 
 package GNormPluslib;
 
-import bioc.BioCAnnotation;
-import bioc.BioCCollection;
-import bioc.BioCDocument;
-import bioc.BioCLocation;
-import bioc.BioCPassage;
 
-import bioc.io.BioCDocumentWriter;
-import bioc.io.BioCFactory;
-import bioc.io.woodstox.ConnectorWoodstox;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.FileInputStream;

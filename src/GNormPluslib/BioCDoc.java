@@ -5,15 +5,12 @@
 
 package GNormPluslib;
 
-import bioc.BioCAnnotation;
-import bioc.BioCCollection;
-import bioc.BioCDocument;
-import bioc.BioCLocation;
-import bioc.BioCPassage;
 
-import bioc.io.BioCDocumentWriter;
-import bioc.io.BioCFactory;
-import bioc.io.woodstox.ConnectorWoodstox;
+import com.pengyifan.bioc.*;
+import com.pengyifan.bioc.io.BioCCollectionReader;
+import com.pengyifan.bioc.io.BioCCollectionWriter;
+import com.pengyifan.bioc.io.BioCDocumentWriter;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.FileInputStream;
@@ -30,14 +27,11 @@ import java.time.ZoneId;
 
 import javax.xml.stream.XMLStreamException;
 
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 
-public class BioCDoc 
+public class BioCDoc
 {
 	/*
 	 * Contexts in BioC file
@@ -47,17 +41,18 @@ public class BioCDoc
 	public ArrayList<ArrayList<Integer>> PassageOffsets = new ArrayList(); // PassageOffset
 	public ArrayList<ArrayList<String>> PassageContexts = new ArrayList(); // PassageContext
 	public ArrayList<ArrayList<ArrayList<String>>> Annotations = new ArrayList(); // Annotation - GNormPlus
-	
+
 	public String BioCFormatCheck(String InputFile) throws IOException
 	{
-		
-		ConnectorWoodstox connector = new ConnectorWoodstox();
-		BioCCollection collection = new BioCCollection();
-		try
-		{
-			collection = connector.startRead(new InputStreamReader(new FileInputStream(InputFile), "UTF-8"));
+
+//		ConnectorWoodstox connector = new ConnectorWoodstox();
+//		BioCCollection collection = new BioCCollection();
+		BioCCollection collection = null;
+//		collection = connector.startRead(new InputStreamReader(new FileInputStream(InputFile), "UTF-8"));
+		try (BioCCollectionReader bioCCollectionReader = new BioCCollectionReader(new InputStreamReader(new FileInputStream(InputFile), "UTF-8"))) {
+			collection = bioCCollectionReader.readCollection();
 		}
-		catch (UnsupportedEncodingException | FileNotFoundException | XMLStreamException e) 
+		catch (UnsupportedEncodingException | FileNotFoundException | XMLStreamException e)
 		{
 			BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(InputFile), "UTF-8"));
 			String line="";
@@ -65,7 +60,7 @@ public class BioCDoc
 			String Pmid = "";
 			boolean tiabs=false;
 			Pattern patt = Pattern.compile("^([^\\|\\t]+)\\|([^\\|\\t]+)\\|(.*)$");
-			while ((line = br.readLine()) != null)  
+			while ((line = br.readLine()) != null)
 			{
 				Matcher mat = patt.matcher(line);
 				if(mat.find()) //Title|Abstract
@@ -122,27 +117,28 @@ public class BioCDoc
 		/*
 		 *  PubTator2BioC
 		 */
-		String parser = BioCFactory.WOODSTOX;
-		BioCFactory factory = BioCFactory.newFactory(parser);
-		BioCDocumentWriter BioCOutputFormat = factory.createBioCDocumentWriter(new OutputStreamWriter(new FileOutputStream(output), "UTF-8"));
+//		String parser = BioCFactory.WOODSTOX;
+//		BioCFactory factory = BioCFactory.newFactory(parser);
+        final BioCCollectionWriter bioCCollectionWriter = new BioCCollectionWriter(new OutputStreamWriter(new FileOutputStream(output), "UTF-8"));
+//        BioCDocumentWriter BioCOutputFormat = factory.createBioCDocumentWriter(new OutputStreamWriter(new FileOutputStream(output), "UTF-8"));
 		BioCCollection biocCollection = new BioCCollection();
-		
+
 		//time
 		ZoneId zonedId = ZoneId.of( "America/Montreal" );
 		LocalDate today = LocalDate.now( zonedId );
 		biocCollection.setDate(today.toString());
-		
+
 		biocCollection.setKey("BioC.key");//key
 		biocCollection.setSource("GNormPlus");//source
-		
-		BioCOutputFormat.writeCollectionInfo(biocCollection);
+
+//		BioCOutputFormat.writeCollectionInfo(biocCollection);
 		BufferedReader inputfile = new BufferedReader(new InputStreamReader(new FileInputStream(input), "UTF-8"));
 		ArrayList<String> ParagraphType=new ArrayList<String>(); // Type: Title|Abstract
 		ArrayList<String> ParagraphContent = new ArrayList<String>(); // Text
 		ArrayList<String> annotations = new ArrayList<String>(); // Annotation
 		String line;
 		String Pmid="";
-		while ((line = inputfile.readLine()) != null)  
+		while ((line = inputfile.readLine()) != null)
 		{
 			if(line.contains("|") && !line.contains("\t")) //Title|Abstract
         	{
@@ -272,10 +268,11 @@ public class BioCDoc
 							}
 							AnnoInfons.put("type", anno[3]);
 							biocAnnotation.setInfons(AnnoInfons);
-							BioCLocation location = new BioCLocation();
-							location.setOffset(Integer.parseInt(anno[0]));
-							location.setLength(Integer.parseInt(anno[1])-Integer.parseInt(anno[0]));
-							biocAnnotation.setLocation(location);
+							BioCLocation location = new BioCLocation(Integer.parseInt(anno[0]),Integer.parseInt(anno[1])-Integer.parseInt(anno[0]));
+//							location.setOffset(Integer.parseInt(anno[0]));
+//							location.setLength(Integer.parseInt(anno[1])-Integer.parseInt(anno[0]));
+//							biocAnnotation.setLocation(location);
+                            biocAnnotation.setLocations(Set.of(location));
 							biocAnnotation.setText(anno[2]);
 							biocPassage.addAnnotation(biocAnnotation);
 						}
@@ -286,10 +283,13 @@ public class BioCDoc
 				ParagraphType.clear();
 				ParagraphContent.clear();
 				annotations.clear();
-				BioCOutputFormat.writeDocument(biocDocument);
+//				BioCOutputFormat.writeDocument(biocDocument);
+                biocCollection.addDocument(biocDocument);
 			}
 		}
-		BioCOutputFormat.close();
+//		BioCOutputFormat.close();
+        bioCCollectionWriter.writeCollection(biocCollection);
+        bioCCollectionWriter.close();
 		inputfile.close();
 	}
 	public void BioC2PubTator(String input,String output) throws IOException, XMLStreamException //Output
@@ -300,17 +300,21 @@ public class BioCDoc
 		HashMap<String, String> pmidlist = new HashMap<String, String>(); // check if appear duplicate pmids
 		boolean duplicate = false;
 		BufferedWriter PubTatorOutputFormat = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(output), "UTF-8"));
-		ConnectorWoodstox connector = new ConnectorWoodstox();
+//		ConnectorWoodstox connector = new ConnectorWoodstox();
 		BioCCollection collection = new BioCCollection();
-		collection = connector.startRead(new InputStreamReader(new FileInputStream(input), "UTF-8"));
-		while (connector.hasNext()) 
+//		collection = connector.startRead(new InputStreamReader(new FileInputStream(input), "UTF-8"));
+        final BioCCollectionReader bioCCollectionReader = new BioCCollectionReader(new InputStreamReader(new FileInputStream(input), "UTF-8"));
+        final Iterator<BioCDocument> docIt = bioCCollectionReader.readCollection().documentIterator();
+//        while (connector.hasNext())
+        while(docIt.hasNext())
 		{
-			BioCDocument document = connector.next();
+//			BioCDocument document = connector.next();
+            BioCDocument document = docIt.next();
 			String PMID = document.getID();
 			if(pmidlist.containsKey(PMID)){System.out.println("\nError: duplicate pmid-"+PMID);duplicate = true;}
 			else{pmidlist.put(PMID,"");}
 			String Anno="";
-			for (BioCPassage passage : document.getPassages()) 
+			for (BioCPassage passage : document.getPassages())
 			{
 				if(passage.getInfon("type").equals("title"))
 				{
@@ -324,17 +328,17 @@ public class BioCDoc
 				{
 					PubTatorOutputFormat.write(PMID+"|"+passage.getInfon("type")+"|"+passage.getText()+"\n");
 				}
-				
-				for (BioCAnnotation annotation : passage.getAnnotations()) 
+
+				for (BioCAnnotation annotation : passage.getAnnotations())
 				{
-					String Annotype = annotation.getInfon("type");
+					String Annotype = annotation.getInfon("type").get();
 					String Annoid="";
 					String Proteinid="";
 					if(Annotype.matches("(Gene|FamilyName|DomainMotif)"))
 					{
 						if(!annotation.getInfon("NCBI Gene").isEmpty())
 						{
-							Annoid = annotation.getInfon("NCBI Gene");
+							Annoid = annotation.getInfon("NCBI Gene").get();
 							String Annoidlist[]=Annoid.split(";");
 							Annoid="";
 							for(int x=0;x<Annoidlist.length;x++)
@@ -342,7 +346,7 @@ public class BioCDoc
 								//Normalization2Protein
 								String proteinid="";
 								String homoid="";
-								
+
 								if(GNormPlus.Normalization2Protein_hash.containsKey(Annoidlist[x]))
 								{
 									proteinid=GNormPlus.Normalization2Protein_hash.get(Annoidlist[x]);
@@ -351,7 +355,7 @@ public class BioCDoc
 								{
 									homoid=GNormPlus.HomologeneID_hash.get(Annoidlist[x]);
 								}
-								
+
 								if((!proteinid.equals("")) || (!homoid.equals("")))
 								{
 									if(Annoid.equals(""))
@@ -412,38 +416,40 @@ public class BioCDoc
 						//}
 						else
 						{
-							Annoid = annotation.getInfon("Identifier");
+							Annoid = annotation.getInfon("Identifier").get();
 						}
 					}
 					else if(Annotype.equals("Species") || Annotype.equals("Genus") || Annotype.equals("Strain"))
 					{
 						if(!annotation.getInfon("NCBI Taxonomy").isEmpty())
 						{
-							Annoid = annotation.getInfon("NCBI Taxonomy");
+							Annoid = annotation.getInfon("NCBI Taxonomy").get();
 						}
 						else
 						{
-							Annoid = annotation.getInfon("Identifier");
+							Annoid = annotation.getInfon("Identifier").get();
 						}
 					}
 					else if(Annotype.equals("CellLine"))
 					{
 						if(!annotation.getInfon("NCBI Taxonomy").isEmpty())
 						{
-							Annoid = annotation.getInfon("NCBI Taxonomy");
+							Annoid = annotation.getInfon("NCBI Taxonomy").get();
 						}
 						else
 						{
-							Annoid = annotation.getInfon("Identifier");
+							Annoid = annotation.getInfon("Identifier").get();
 						}
 					}
 					else
 					{
-						Annoid = annotation.getInfon("Identifier");
+						Annoid = annotation.getInfon("Identifier").get();
 					}
-					int start = annotation.getLocations().get(0).getOffset();
-					int last = start + annotation.getLocations().get(0).getLength();
-					String AnnoMention=annotation.getText();
+//					int start = annotation.getLocations().get(0).getOffset();
+//					int last = start + annotation.getLocations().get(0).getLength();
+                    int start = annotation.getTotalLocation().getOffset();
+					int last = start + annotation.getTotalLocation().getLength();
+					String AnnoMention=annotation.getText().get();
 					Anno=Anno+PMID+"\t"+start+"\t"+last+"\t"+AnnoMention+"\t"+Annotype+"\t"+Annoid+"\n";
 				}
 			}
@@ -461,7 +467,7 @@ public class BioCDoc
 		String line;
 		String Pmid="";
 		int count_paragraph=0;
-		while ((line = inputfile.readLine()) != null)  
+		while ((line = inputfile.readLine()) != null)
 		{
 			if(line.contains("|") && !line.contains("\t")) //Title|Abstract
         	{
@@ -480,24 +486,27 @@ public class BioCDoc
 			}
 		}
 		inputfile.close();
-		
+
 		/*
 		 * BioC2PubTator
 		 */
 		HashMap<String, String> pmidlist = new HashMap<String, String>(); // check if appear duplicate pmids
 		boolean duplicate = false;
 		BufferedWriter PubTatorOutputFormat = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(output), "UTF-8"));
-		ConnectorWoodstox connector = new ConnectorWoodstox();
+//		ConnectorWoodstox connector = new ConnectorWoodstox();
 		BioCCollection collection = new BioCCollection();
-		collection = connector.startRead(new InputStreamReader(new FileInputStream(input), "UTF-8"));
-		while (connector.hasNext()) 
+//		collection = connector.startRead(new InputStreamReader(new FileInputStream(input), "UTF-8"));
+//		while (connector.hasNext())
+        final Iterator<BioCDocument> docIt = new BioCCollectionReader(new InputStreamReader(new FileInputStream(input), "UTF-8")).readCollection().documentIterator();
+        while(docIt.hasNext())
 		{
-			BioCDocument document = connector.next();
-			String PMID = document.getID();
+//			BioCDocument document = connector.next();
+            final BioCDocument document = docIt.next();
+            String PMID = document.getID();
 			if(pmidlist.containsKey(PMID)){System.out.println("\nError: duplicate pmid-"+PMID);duplicate = true;}
 			else{pmidlist.put(PMID,"");}
 			String Anno="";
-			for (BioCPassage passage : document.getPassages()) 
+			for (BioCPassage passage : document.getPassages())
 			{
 				if(passage.getInfon("type").equals("title") || passage.getInfon("type").equals("t"))
 				{
@@ -511,17 +520,17 @@ public class BioCDoc
 				{
 					PubTatorOutputFormat.write(PMID+"|"+passage.getInfon("type")+"|"+passage.getText()+"\n");
 				}
-				
-				for (BioCAnnotation annotation : passage.getAnnotations()) 
+
+				for (BioCAnnotation annotation : passage.getAnnotations())
 				{
-					String Annotype = annotation.getInfon("type");
+					String Annotype = annotation.getInfon("type").get();
 					String Annoid="";
 					String Proteinid="";
 					if(Annotype.matches("(Gene|FamilyName|DomainMotif)"))
 					{
 						if(annotation.getInfons().containsKey("NCBI Gene"))
 						{
-							Annoid = annotation.getInfon("NCBI Gene");
+							Annoid = annotation.getInfon("NCBI Gene").get();
 							String Annoidlist[]=Annoid.split(";");
 							Annoid="";
 							for(int x=0;x<Annoidlist.length;x++)
@@ -529,7 +538,7 @@ public class BioCDoc
 								//Normalization2Protein
 								String proteinid="";
 								String homoid="";
-								
+
 								if(GNormPlus.Normalization2Protein_hash.containsKey(Annoidlist[x]))
 								{
 									proteinid=GNormPlus.Normalization2Protein_hash.get(Annoidlist[x]);
@@ -538,7 +547,7 @@ public class BioCDoc
 								{
 									homoid=GNormPlus.HomologeneID_hash.get(Annoidlist[x]);
 								}
-								
+
 								if((!proteinid.equals("")) || (!homoid.equals("")))
 								{
 									if(Annoid.equals(""))
@@ -599,45 +608,47 @@ public class BioCDoc
 						//}
 						else
 						{
-							Annoid = annotation.getInfon("Identifier");
+							Annoid = annotation.getInfon("Identifier").get();
 						}
 					}
 					else if(Annotype.equals("Species") || Annotype.equals("Genus") || Annotype.equals("Strain"))
 					{
 						if(annotation.getInfons().containsKey("NCBI Taxonomy"))
 						{
-							Annoid = annotation.getInfon("NCBI Taxonomy");
+							Annoid = annotation.getInfon("NCBI Taxonomy").get();
 						}
 						else
 						{
-							Annoid = annotation.getInfon("Identifier");
+							Annoid = annotation.getInfon("Identifier").get();
 						}
 					}
 					else if(Annotype.equals("CellLine"))
 					{
 						if(!annotation.getInfon("NCBI Taxonomy").isEmpty())
 						{
-							Annoid = annotation.getInfon("NCBI Taxonomy");
+							Annoid = annotation.getInfon("NCBI Taxonomy").get();
 						}
 						else
 						{
-							Annoid = annotation.getInfon("Identifier");
+							Annoid = annotation.getInfon("Identifier").get();
 						}
 					}
 					else
 					{
 						if(annotation.getInfons().containsKey("Identifier"))
 						{
-							Annoid = annotation.getInfon("Identifier");
+							Annoid = annotation.getInfon("Identifier").get();
 						}
 						else
 						{
 							Annoid = "";
 						}
 					}
-					int start = annotation.getLocations().get(0).getOffset();
-					int last = start + annotation.getLocations().get(0).getLength();
-					String AnnoMention=annotation.getText();
+//					int start = annotation.getLocations().get(0).getOffset();
+//					int last = start + annotation.getLocations().get(0).getLength();
+                    int start = annotation.getTotalLocation().getOffset();
+                    int last = start + annotation.getTotalLocation().getLength();
+					String AnnoMention=annotation.getText().get();
 					if(Annoid != null && !Annoid.equals(null))
 					{
 						Anno=Anno+PMID+"\t"+start+"\t"+last+"\t"+AnnoMention+"\t"+Annotype+"\t"+Annoid+"\n";
@@ -655,30 +666,32 @@ public class BioCDoc
 	}
 	public void BioCReader(String input) throws IOException, XMLStreamException
 	{
-		ConnectorWoodstox connector = new ConnectorWoodstox();
+//		ConnectorWoodstox connector = new ConnectorWoodstox();
 		BioCCollection collection = new BioCCollection();
-		collection = connector.startRead(new InputStreamReader(new FileInputStream(input), "UTF-8"));
-		
+//		collection = connector.startRead(new InputStreamReader(new FileInputStream(input), "UTF-8"));
+        final Iterator<BioCDocument> docIt = new BioCCollectionReader(new InputStreamReader(new FileInputStream(input), "UTF-8")).readCollection().documentIterator();
+        while(docIt.hasNext())
 		/*
 		 * Per document
 		 */
-		while (connector.hasNext()) 
+//		while (connector.hasNext())
 		{
-			BioCDocument document = connector.next();
-			PMIDs.add(document.getID());
-			
+//			BioCDocument document = connector.next();
+            final BioCDocument document = docIt.next();
+            PMIDs.add(document.getID());
+
 			ArrayList<String> PassageName= new ArrayList<String>(); // array of Passage name
 			ArrayList<Integer> PassageOffset= new ArrayList<Integer>(); // array of Passage offset
 			ArrayList<String> PassageContext= new ArrayList<String>(); // array of Passage context
 			ArrayList<ArrayList<String>> AnnotationInPMID= new ArrayList(); // array of Annotations in the PassageName
-			
+
 			/*
 			 * Per Passage
 			 */
-			for (BioCPassage passage : document.getPassages()) 
+			for (BioCPassage passage : document.getPassages())
 			{
-				PassageName.add(passage.getInfon("type")); //Paragraph
-				String txt = passage.getText();
+				PassageName.add(passage.getInfon("type").get()); //Paragraph
+				String txt = passage.getText().get();
 				if(txt.matches("[\t ]+"))
 				{
 					txt = txt.replaceAll(".","@");
@@ -756,7 +769,7 @@ public class BioCDoc
 					txt = txt.replaceAll("Φ","F");
 					//txt = txt.replaceAll("[^\\~\\!\\@\\#\\$\\%\\^\\&\\*\\(\\)\\_\\+\\{\\}\\|\\:\"\\<\\>\\?\\`\\-\\=\\[\\]\\;\\'\\,\\.\\/\\r\\n0-9a-zA-Z ]"," ");
 				}
-				if(passage.getText().equals("") || passage.getText().matches("[ ]+"))
+				if(passage.getText().equals("") || passage.getText().get().matches("[ ]+"))
 				{
 					PassageContext.add("-notext-"); //Context
 				}
@@ -772,35 +785,37 @@ public class BioCDoc
 			PassageContexts.add(PassageContext);
 			PassageOffsets.add(PassageOffset);
 			Annotations.add(AnnotationInPMID);
-		}	
+		}
 	}
 	public void BioCReaderWithAnnotation(String input) throws IOException, XMLStreamException
 	{
-		ConnectorWoodstox connector = new ConnectorWoodstox();
+//		ConnectorWoodstox connector = new ConnectorWoodstox();
 		BioCCollection collection = new BioCCollection();
-		collection = connector.startRead(new InputStreamReader(new FileInputStream(input), "UTF-8"));
-		
+//		collection = connector.startRead(new InputStreamReader(new FileInputStream(input), "UTF-8"));
+        final Iterator<BioCDocument> docIt = new BioCCollectionReader(new InputStreamReader(new FileInputStream(input), "UTF-8")).readCollection().documentIterator();
+        while(docIt.hasNext())
 		/*
 		 * Per document
 		 */
-		while (connector.hasNext()) 
+//		while (connector.hasNext())
 		{
-			BioCDocument document = connector.next();
-			PMIDs.add(document.getID());
-			
+//			BioCDocument document = connector.next();
+            final BioCDocument document = docIt.next();
+            PMIDs.add(document.getID());
+
 			ArrayList<String> PassageName= new ArrayList<String>(); // array of Passage name
 			ArrayList<Integer> PassageOffset= new ArrayList<Integer>(); // array of Passage offset
 			ArrayList<String> PassageContext= new ArrayList<String>(); // array of Passage context
 			ArrayList<ArrayList<String>> AnnotationInPMID= new ArrayList(); // array of Annotations in the PassageName
-			
+
 			/*
 			 * Per Passage
 			 */
-			for (BioCPassage passage : document.getPassages()) 
+			for (BioCPassage passage : document.getPassages())
 			{
-				PassageName.add(passage.getInfon("type")); //Paragraph
-				
-				String txt = passage.getText();
+				PassageName.add(passage.getInfon("type").get()); //Paragraph
+
+				String txt = passage.getText().get();
 				if(txt.matches("[\t ]+"))
 				{
 					txt = txt.replaceAll(".","@");
@@ -878,7 +893,7 @@ public class BioCDoc
 					txt = txt.replaceAll("Φ","F");
 					//txt = txt.replaceAll("[^\\~\\!\\@\\#\\$\\%\\^\\&\\*\\(\\)\\_\\+\\{\\}\\|\\:\"\\<\\>\\?\\`\\-\\=\\[\\]\\;\\'\\,\\.\\/\\r\\n0-9a-zA-Z ]"," ");
 				}
-				if(passage.getText().equals("") || passage.getText().matches("[ ]+"))
+				if(passage.getText().equals("") || passage.getText().get().matches("[ ]+"))
 				{
 					PassageContext.add("-notext-"); //Context
 				}
@@ -888,7 +903,7 @@ public class BioCDoc
 				}
 				PassageOffset.add(passage.getOffset()); //Offset
 				ArrayList<String> AnnotationInPassage= new ArrayList<String>(); // array of Annotations in the PassageName
-				
+
 				/*
 				 * Per Annotation :
 				 * start
@@ -897,16 +912,18 @@ public class BioCDoc
 				 * type
 				 * id
 				 */
-				for (BioCAnnotation Anno : passage.getAnnotations()) 
+				for (BioCAnnotation Anno : passage.getAnnotations())
 				{
-					int start = Anno.getLocations().get(0).getOffset()-passage.getOffset(); // start
-					int last = start + Anno.getLocations().get(0).getLength(); // last
-					String AnnoMention=Anno.getText(); // mention
-					String Annotype = Anno.getInfon("type"); // type
-					String Annoid = Anno.getInfon("Identifier"); // identifier | MESH
+//					int start = Anno.getLocations().get(0).getOffset()-passage.getOffset(); // start
+//					int last = start + Anno.getLocations().get(0).getLength(); // last
+                    int start = Anno.getTotalLocation().getOffset()-passage.getOffset(); // start
+                    int last = start + Anno.getTotalLocation().getLength(); // last
+					String AnnoMention=Anno.getText().get(); // mention
+					String Annotype = Anno.getInfon("type").get(); // type
+					String Annoid = Anno.getInfon("Identifier").get(); // identifier | MESH
 					if(Annoid == null)
 					{
-						Annoid = Anno.getInfon("Identifier"); // identifier | MESH
+						Annoid = Anno.getInfon("Identifier").get(); // identifier | MESH
 					}
 					if(Annoid == null || Annoid.equals("null"))
 					{
@@ -923,7 +940,7 @@ public class BioCDoc
 			PassageContexts.add(PassageContext);
 			PassageOffsets.add(PassageOffset);
 			Annotations.add(AnnotationInPMID);
-		}	
+		}
 	}
 	public void BioCOutput(String input,String output, ArrayList<ArrayList<ArrayList<String>>> Annotations,boolean Final) throws IOException, XMLStreamException
 	{
@@ -937,43 +954,48 @@ public class BioCDoc
 		{
 			ShowUnNormalizedMention = true;
 		}
-		
-		BioCDocumentWriter BioCOutputFormat = BioCFactory.newFactory(BioCFactory.WOODSTOX).createBioCDocumentWriter(new OutputStreamWriter(new FileOutputStream(output), "UTF-8"));
-		BioCCollection biocCollection_input = new BioCCollection();
+
+//		BioCDocumentWriter BioCOutputFormat = BioCFactory.newFactory(BioCFactory.WOODSTOX).createBioCDocumentWriter(new OutputStreamWriter(new FileOutputStream(output), "UTF-8"));
+        final BioCDocumentWriter BioCOutputFormat = new BioCDocumentWriter(new OutputStreamWriter(new FileOutputStream(output), "UTF-8"));
+        BioCCollection biocCollection_input = new BioCCollection();
 		BioCCollection biocCollection_output = new BioCCollection();
-		
+
 		//input: BioC
-		ConnectorWoodstox connector = new ConnectorWoodstox();
-		biocCollection_input = connector.startRead(new InputStreamReader(new FileInputStream(input), "UTF-8"));
-		BioCOutputFormat.writeCollectionInfo(biocCollection_input);
+//        ConnectorWoodstox connector = new ConnectorWoodstox();
+//		biocCollection_input = connector.startRead(new InputStreamReader(new FileInputStream(input), "UTF-8"));
+         biocCollection_input = new BioCCollectionReader(new InputStreamReader(new FileInputStream(input), "UTF-8")).readCollection();
+		BioCOutputFormat.writeBeginCollectionInfo(biocCollection_input);
 		int i=0; //count for pmid
-		while (connector.hasNext()) 
+        final Iterator<BioCDocument> docIt = biocCollection_input.documentIterator();
+//        while (connector.hasNext())
+        while(docIt.hasNext())
 		{
 			BioCDocument document_output = new BioCDocument();
-			BioCDocument document_input = connector.next();
-			String PMID=document_input.getID();
+//			BioCDocument document_input = connector.next();
+            final BioCDocument document_input = docIt.next();
+            String PMID=document_input.getID();
 			document_output.setID(PMID);
 			int annotation_count=0;
 			int j=0; //count for paragraph
-			for (BioCPassage passage_input : document_input.getPassages()) 
+			for (BioCPassage passage_input : document_input.getPassages())
 			{
 				BioCPassage passage_output = passage_input;
-				
+
 				if(IgnoreNER == true) //clean the previous annotation, if the NER result is provided
 				{
 					passage_output.clearAnnotations();
 				}
 				else
 				{
-					for (BioCAnnotation annotation : passage_output.getAnnotations()) 
+					for (BioCAnnotation annotation : passage_output.getAnnotations())
 					{
 						annotation.setID(""+annotation_count);
 						annotation_count++;
 					}
 				}
-				
+
 				int passage_Offset = passage_input.getOffset();
-				String passage_Text = passage_input.getText();
+				String passage_Text = passage_input.getText().get();
 				ArrayList<String> AnnotationInPassage = new ArrayList<String>();
 				//ArrayList<String> AnnotationInPassage = Annotations.get(i).get(j);
 				if(Annotations.size()>i && Annotations.get(i).size()>j)
@@ -1025,7 +1047,7 @@ public class BioCDoc
 									String typeb = Annob[3];
 									String idb = ""; // optional
 									if(Annob.length>=5){idb = Annob[4];}
-									
+
 									if(start == startb && last == lastb && type.equals(typeb))
 									{
 										found = true;
@@ -1045,7 +1067,7 @@ public class BioCDoc
 											{
 												AnnotationInPassage.set(b, start+"\t"+last+"\t"+mention+"\t"+type+"\t"+idb+";"+id);
 											}
-											
+
 										}
 										break;
 									}
@@ -1098,9 +1120,9 @@ public class BioCDoc
 							}
 						}
 						AnnotationInPassage.set(a, Anno[0]+"\t"+Anno[1]+"\t"+Anno[2]+"\t"+Anno[3]+"\t"+ids);
-					}					
+					}
 				}
-				
+
 				for(int a=0;a<AnnotationInPassage.size();a++)
 				{
 					String Anno[]=AnnotationInPassage.get(a).split("\\t");
@@ -1222,7 +1244,7 @@ public class BioCDoc
 															HomoidSTR.add(GNormPlus.HomologeneID_hash.get(NCBIGeneID));
 														}
 													}
-													
+
 												}
 												else if(mtmp5.find())
 												{
@@ -1248,7 +1270,7 @@ public class BioCDoc
 												}
 											}
 											AnnoInfons.put("NCBI Gene", idSTR);
-											
+
 											String pidSTR="";
 											for(int x=0;x<ProteinidSTR.size();x++)
 											{
@@ -1265,7 +1287,7 @@ public class BioCDoc
 											{
 												AnnoInfons.put("UniProt", pidSTR);
 											}
-											
+
 											String hidSTR="";
 											for(int x=0;x<HomoidSTR.size();x++)
 											{
@@ -1310,10 +1332,10 @@ public class BioCDoc
 							}
 						}
 						biocAnnotation.setInfons(AnnoInfons);
-						BioCLocation location = new BioCLocation();
-						location.setOffset(start+passage_Offset);
-						location.setLength(last-start);
-						biocAnnotation.setLocation(location);
+						BioCLocation location = new BioCLocation(start+passage_Offset,last-start);
+//						location.setOffset(start+passage_Offset);
+//						location.setLength(last-start);
+						biocAnnotation.setLocations(Set.of(location));
 						biocAnnotation.setText(mention);
 						biocAnnotation.setID(""+annotation_count);
 						annotation_count++;
@@ -1339,5 +1361,5 @@ public class BioCDoc
 			i++;
 		}
 		BioCOutputFormat.close();
-	}	
+	}
 }
