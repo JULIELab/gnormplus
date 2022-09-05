@@ -1,15 +1,9 @@
 package GNormPluslib;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
+import java.io.*;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -17,6 +11,7 @@ import javax.xml.stream.XMLStreamException;
 
 public class GNormPlus
 {
+	public static boolean initialized = false;
 	public static PrefixTree PT_Species = new PrefixTree();
 	public static PrefixTree PT_Cell = new PrefixTree();
 	public static PrefixTree PT_CTDGene = new PrefixTree();
@@ -75,8 +70,8 @@ public class GNormPlus
 				FocusSpecies=args[3];
 			}
 		}
-
-		loadConfiguration(FocusSpecies);
+//		BufferedReader br = new BufferedReader(new FileReader(SetupFile));
+		loadConfiguration(new FileInputStream(SetupFile), FocusSpecies);
 		/*
 		 * Time stamp - start : All
 		 */
@@ -133,8 +128,8 @@ public class GNormPlus
 		}
 	}
 
-	private static void loadConfiguration(String FocusSpecies) throws IOException {
-		BufferedReader br = new BufferedReader(new FileReader(SetupFile));
+	public static void loadConfiguration(InputStream setupFileStream, String FocusSpecies) throws IOException {
+		BufferedReader br = new BufferedReader(new InputStreamReader(setupFileStream, "UTF-8"));
 		String line="";
 		Pattern ptmp = Pattern.compile("^	([A-Za-z0-9]+) = ([^ \\t\\n\\r]+)$");
 		while ((line = br.readLine()) != null)
@@ -168,7 +163,7 @@ public class GNormPlus
 		}
 	}
 
-	private static String loadResources(String FocusSpecies, double startTime) throws IOException {
+	public static String loadResources(String FocusSpecies, double startTime) throws IOException {
 		double endTime;
 		double totTime;
 		String line;
@@ -467,15 +462,16 @@ public class GNormPlus
 		endTime = System.currentTimeMillis();
 		totTime = endTime - startTime;
 		System.out.println("Loading Gene Dictionary : Processing Time:"+totTime/1000+"sec");
+		initialized = true;
 		return TrainTest;
 	}
 
-	private static void processFile(String inputFilePath, String InputFileName, String outputFilePath, double startTime, String TrainTest) throws IOException, XMLStreamException {
+	public static void processFile(String inputFilePath, String InputFileName, String outputFilePath, double startTime, String TrainTest) throws IOException, XMLStreamException {
 		double endTime;
 		BufferedReader br;
 		double totTime;
 		String line;
-		final GNPProcessingData data = new GNPProcessingData();
+		final GNPProcessingData data = new GNPProcessingData(GNormPlus.Filtering_hash);
 //						BioCDocobj = new BioCDoc();
 
 		/*
@@ -589,7 +585,13 @@ public class GNormPlus
 
 			}
 		}
-
+		for (int i = 0; i < data.getBioCDocobj().PMIDs.size(); i++) {
+			String pmid = data.getBioCDocobj().PMIDs.get(i);
+			final int fi = i;
+			for (var annotation : (Iterable<String>) () -> data.getBioCDocobj().Annotations.get(fi).stream().flatMap(Collection::stream).iterator()) {
+				System.out.println("[1]" + pmid + " " + annotation);
+			}
+		}
 		/*
 		 * SR & SA
 		 */
@@ -658,7 +660,13 @@ public class GNormPlus
 			fr.close();
 		}
 
-
+		for (int i = 0; i < data.getBioCDocobj().PMIDs.size(); i++) {
+			String pmid = data.getBioCDocobj().PMIDs.get(i);
+			final int fi = i;
+			for (var annotation : (Iterable<String>) () -> data.getBioCDocobj().Annotations.get(fi).stream().flatMap(Collection::stream).iterator()) {
+				System.out.println("[2]" + pmid + " " + annotation);
+			}
+		}
 		if(setup_hash.get("SpeciesAssignmentOnly").equals("True"))
 		{
 			if(Format.equals("PubTator"))
@@ -743,7 +751,13 @@ public class GNormPlus
 				}
 			}
 		}
-
+		for (int i = 0; i < data.getBioCDocobj().PMIDs.size(); i++) {
+			String pmid = data.getBioCDocobj().PMIDs.get(i);
+			final int fi = i;
+			for (var annotation : (Iterable<String>) () -> data.getBioCDocobj().Annotations.get(fi).stream().flatMap(Collection::stream).iterator()) {
+				System.out.println("[3]" + pmid + " " + annotation);
+			}
+		}
 		/*
 		 * remove tmp files
 		 */

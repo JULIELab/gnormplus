@@ -294,6 +294,7 @@ public class GN
 				for (int k = 0; k < data.getBioCDocobj().Annotations.get(i).get(j).size(); k++) /** Annotation : k */
 				{
 					String anno[] = data.getBioCDocobj().Annotations.get(i).get(j).get(k).split("\t");
+					//System.out.println("[1]"+Pmid + " " + data.getBioCDocobj().Annotations.get(i).get(j).get(k));
     				String start=anno[0];
 					String last=anno[1];
 					String mentions=anno[2];
@@ -313,6 +314,9 @@ public class GN
 					if(GNormPlus.Filtering_hash.containsKey(mentions_tmp)) // filtering
 					{
 						found_filter=true;
+						System.out.println("Filtering_hash contains " + mentions_tmp + ": " + true);
+					} else {
+						System.out.println("Filtering_hash contains " + mentions_tmp + ": " + false);
 					}
 					
 					if(found_filter==false) //abbreviation
@@ -327,6 +331,7 @@ public class GN
 								if(tiabs.matches(".*"+lf+".*"))
 								{
 									found_filter=true;
+									System.out.println("Found filter 2");
 									break;
 								}
 							}
@@ -340,7 +345,7 @@ public class GN
 									)
 						{
 							found_filter=true;
-			 
+							System.out.println("Found filter 3");
 						}
 					}
 					
@@ -351,12 +356,14 @@ public class GN
 							if(GeneMention_hash.containsKey(mentions+"\t"+taxids))
 	    					{
 	    						GeneMention_hash.get(mentions+"\t"+taxids).put(start+"\t"+last,"");
+								System.out.println("GeneMention_hash append for " + mentions + ": " + start+"\t"+last + " -> <empty string>");
 	    					}
 	    					else 
 	    					{
 	    						HashMap<String,String> offset_hash = new HashMap<String,String>();
 	    						offset_hash.put(start+"\t"+last,"");
 	    						GeneMention_hash.put(mentions+"\t"+taxids, offset_hash);
+								System.out.println("GeneMention_hash put for " + mentions + ": " + mentions+"\t"+taxids + " -> " + offset_hash);
 	    						GeneMention_hash.get(mentions+"\t"+taxids).put("type", type);
 	    						Mention_hash.put(mentions,"Gene");
 	    					}
@@ -400,7 +407,6 @@ public class GN
 					String mention = GMs[ms];
 					String IDstr = GNormPlus.PT_Gene.MentionMatch(mention); /** searched by PT_Gene */
 					String IDs[]=IDstr.split("\\|");
-					
 					/*
 					 * printing the ambiguous gene mentions and candidates
 					 */

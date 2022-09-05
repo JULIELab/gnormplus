@@ -125,7 +125,7 @@ public class SR
 			        				String mentions_tmp=mention.toLowerCase();
 		    						mentions_tmp=mentions_tmp.replaceAll("[\\W\\-\\_]","");
 		    						mentions_tmp=mentions_tmp.replaceAll("[0-9]","0");
-		    						GNormPlus.Filtering_hash.put(mentions_tmp,"");
+		    						data.getFiltering_hash().put(mentions_tmp,"");
 			        				Mention2ID_lc.put(mention.toLowerCase(), id); //+antibody
 			        				
 			         				String mention_genus = "";
@@ -221,7 +221,7 @@ public class SR
 									String mentions_tmp=mention.toLowerCase();
 		    						mentions_tmp=mentions_tmp.replaceAll("[\\W\\-\\_]","");
 		    						mentions_tmp=mentions_tmp.replaceAll("[0-9]","0");
-		    						GNormPlus.Filtering_hash.put(mentions_tmp,"");
+		    						data.getFiltering_hash().put(mentions_tmp,"");
 			    					IDset.add(id);
 			    					for(int s=start;s<last;s++)
 									{
@@ -291,7 +291,7 @@ public class SR
 							String mentions_tmp=mention.toLowerCase();
     						mentions_tmp=mentions_tmp.replaceAll("[\\W\\-\\_]","");
     						mentions_tmp=mentions_tmp.replaceAll("[0-9]","0");
-    						GNormPlus.Filtering_hash.put(mentions_tmp,"");
+    						data.getFiltering_hash().put(mentions_tmp,"");
 							IDset.add(id);
 							for(int s=Integer.parseInt(start);s<Integer.parseInt(last);s++)
 							{
@@ -361,7 +361,7 @@ public class SR
 								String mentions_tmp=mention.toLowerCase();
 	    						mentions_tmp=mentions_tmp.replaceAll("[\\W\\-\\_]","");
 	    						mentions_tmp=mentions_tmp.replaceAll("[0-9]","0");
-	    						GNormPlus.Filtering_hash.put(mentions_tmp,"");
+	    						data.getFiltering_hash().put(mentions_tmp,"");
 			        			IDset.add(id);
 			        			for(int s=Integer.parseInt(start);s<Integer.parseInt(last);s++)
 								{
@@ -438,7 +438,7 @@ public class SR
 							String mentions_tmp=mention.toLowerCase();
     						mentions_tmp=mentions_tmp.replaceAll("[\\W\\-\\_]","");
     						mentions_tmp=mentions_tmp.replaceAll("[0-9]","0");
-    						GNormPlus.Filtering_hash.put(mentions_tmp,"");
+    						data.getFiltering_hash().put(mentions_tmp,"");
 		        			Mention2ID_lc.put(mention.toLowerCase(), id);
 		        			IDset.add(id);
 		        			for(int s=Integer.parseInt(start);s<Integer.parseInt(last);s++)
@@ -473,7 +473,7 @@ public class SR
 								String mentions_tmp=mention.toLowerCase();
 	    						mentions_tmp=mentions_tmp.replaceAll("[\\W\\-\\_]","");
 	    						mentions_tmp=mentions_tmp.replaceAll("[0-9]","0");
-	    						GNormPlus.Filtering_hash.put(mentions_tmp,"");
+	    						data.getFiltering_hash().put(mentions_tmp,"");
 							}
 						}
 		    			else if (SpAnno.length>4) 
@@ -500,7 +500,7 @@ public class SR
 										String mentions_tmp=mention.toLowerCase();
 			    						mentions_tmp=mentions_tmp.replaceAll("[\\W\\-\\_]","");
 			    						mentions_tmp=mentions_tmp.replaceAll("[0-9]","0");
-			    						GNormPlus.Filtering_hash.put(mentions_tmp,"");
+			    						data.getFiltering_hash().put(mentions_tmp,"");
 			    						x=1000000;
 			    					}
 		    					}
@@ -540,7 +540,7 @@ public class SR
 									String mentions_tmp=mention.toLowerCase();
 		    						mentions_tmp=mentions_tmp.replaceAll("[\\W\\-\\_]","");
 		    						mentions_tmp=mentions_tmp.replaceAll("[0-9]","0");
-		    						GNormPlus.Filtering_hash.put(mentions_tmp,"");
+		    						data.getFiltering_hash().put(mentions_tmp,"");
 				        			
 		    					}
 		    				}

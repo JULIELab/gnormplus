@@ -1264,6 +1264,7 @@ public class GNR
 					for(int k=0;k<data.getBioCDocobj().Annotations.get(i).get(j).size();k++) // Annotation
 					{
 						String Anno[] = data.getBioCDocobj().Annotations.get(i).get(j).get(k).split("\\t");
+						System.out.println("[GNRPostProc]"+pmid + " " + data.getBioCDocobj().Annotations.get(i).get(j).get(k));
 						String start = Anno[0];
 						String last = Anno[1];
 						String mention = Anno[2];
@@ -1542,6 +1543,7 @@ public class GNR
 												data.getBioCDocobj().Annotations.get(i).get(j).remove(start+"\t"+last+"\t"+mention+"\tDomainMotif");
 											}
 											data.getBioCDocobj().Annotations.get(i).get(j).add(start+"\t"+last+"\t"+mention+"\tGene");
+											System.out.println("Added in PostProcessing [1]: " + start+"\t"+last+"\t"+mention+"\tGene");
 										}
 										gmtmp = gmtmp.replaceAll(".", "X");
 										PassageContexts_tmp=pre+""+gmtmp+""+post;
@@ -1585,6 +1587,7 @@ public class GNR
 											if(!data.getBioCDocobj().Annotations.get(i).get(j).contains(start+"\t"+last+"\t"+mention+"\tGene"))
 											{
 												data.getBioCDocobj().Annotations.get(i).get(j).add(start+"\t"+last+"\t"+mention+"\t"+type);
+												System.out.println("Added in PostProcessing [2]: "+start+"\t"+last+"\t"+mention+"\t"+type);
 											}
 										}
 										gmtmp = gmtmp.replaceAll(".", "X");
