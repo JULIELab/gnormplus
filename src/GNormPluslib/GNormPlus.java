@@ -177,7 +177,7 @@ public class GNormPlus
 			TrainTest = setup_hash.get("TrainTest");
 		}
 
-		System.out.print("Loading Gene/Species Dictionary : Processing ... \r");
+//		System.out.print("Loading Gene/Species Dictionary : Processing ... \r");
 		/** Load Dictionary */
 		{
 			/** GeneWithoutSPPrefix */
@@ -461,7 +461,7 @@ public class GNormPlus
 		}
 		endTime = System.currentTimeMillis();
 		totTime = endTime - startTime;
-		System.out.println("Loading Gene Dictionary : Processing Time:"+totTime/1000+"sec");
+//		System.out.println("Loading Gene Dictionary : Processing Time:"+totTime/1000+"sec");
 		initialized = true;
 		return TrainTest;
 	}
@@ -494,7 +494,7 @@ public class GNormPlus
 			System.exit(0);
 		}
 
-		System.out.print(inputFilePath +" - ("+Format+" format) : Processing ... \r");
+//		System.out.print(inputFilePath +" - ("+Format+" format) : Processing ... \r");
 		/*
 		 * GNR
 		 */
@@ -585,13 +585,6 @@ public class GNormPlus
 
 			}
 		}
-		for (int i = 0; i < data.getBioCDocobj().PMIDs.size(); i++) {
-			String pmid = data.getBioCDocobj().PMIDs.get(i);
-			final int fi = i;
-			for (var annotation : (Iterable<String>) () -> data.getBioCDocobj().Annotations.get(fi).stream().flatMap(Collection::stream).iterator()) {
-				System.out.println("[1]" + pmid + " " + annotation);
-			}
-		}
 		/*
 		 * SR & SA
 		 */
@@ -660,13 +653,6 @@ public class GNormPlus
 			fr.close();
 		}
 
-		for (int i = 0; i < data.getBioCDocobj().PMIDs.size(); i++) {
-			String pmid = data.getBioCDocobj().PMIDs.get(i);
-			final int fi = i;
-			for (var annotation : (Iterable<String>) () -> data.getBioCDocobj().Annotations.get(fi).stream().flatMap(Collection::stream).iterator()) {
-				System.out.println("[2]" + pmid + " " + annotation);
-			}
-		}
 		if(setup_hash.get("SpeciesAssignmentOnly").equals("True"))
 		{
 			if(Format.equals("PubTator"))
@@ -751,13 +737,6 @@ public class GNormPlus
 				}
 			}
 		}
-		for (int i = 0; i < data.getBioCDocobj().PMIDs.size(); i++) {
-			String pmid = data.getBioCDocobj().PMIDs.get(i);
-			final int fi = i;
-			for (var annotation : (Iterable<String>) () -> data.getBioCDocobj().Annotations.get(fi).stream().flatMap(Collection::stream).iterator()) {
-				System.out.println("[3]" + pmid + " " + annotation);
-			}
-		}
 		/*
 		 * remove tmp files
 		 */
@@ -783,6 +762,6 @@ public class GNormPlus
 		 */
 		endTime = System.currentTimeMillis();
 		totTime = endTime - startTime;
-		System.out.println(inputFilePath +" - ("+Format+" format) : Processing Time:"+totTime/1000+"sec");
+//		System.out.println(inputFilePath +" - ("+Format+" format) : Processing Time:"+totTime/1000+"sec");
 	}
 }

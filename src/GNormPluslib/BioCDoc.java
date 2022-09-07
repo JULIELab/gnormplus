@@ -944,13 +944,6 @@ public class BioCDoc
 	}
 	public void BioCOutput(String input,String output, ArrayList<ArrayList<ArrayList<String>>> Annotations,boolean Final) throws IOException, XMLStreamException
 	{
-		if (Final) {
-			final Iterator<String> it = Annotations.stream().flatMap(Collection::stream).flatMap(Collection::stream).iterator();
-			while (it.hasNext()) {
-				String next = it.next();
-				System.out.println("Final BioC output annotation: " + next);
-			}
-		}
 		boolean IgnoreNER = false;
 		if(GNormPlus.setup_hash.containsKey("IgnoreNER") && GNormPlus.setup_hash.get("IgnoreNER").equals("True"))
 		{
@@ -1028,8 +1021,6 @@ public class BioCDoc
 									Anno[4]=Anno[5];
 								}
 							}
-							if (mention.equals("MCP-1") && start + passage_Offset == 661)
-								System.out.println("Offset 661: " + PMID + " -> " + Annotations.get(i).get(j).get(a));
 							String type = Anno[3];
 							String id = ""; // optional
 							if(Anno.length>=5){id = Anno[4];}
@@ -1135,7 +1126,6 @@ public class BioCDoc
 				for(int a=0;a<AnnotationInPassage.size();a++)
 				{
 					String Anno[]=AnnotationInPassage.get(a).split("\\t");
-					System.out.println("Frueher: " + AnnotationInPassage.get(a) + " " + a);
 					int start = Integer.parseInt(Anno[0]);
 					int last = Integer.parseInt(Anno[1]);
 					if(passage_Text.length()>last)
@@ -1173,7 +1163,6 @@ public class BioCDoc
 									Matcher mtmp2 = ptmp2.matcher(identifier);
 									Pattern ptmp3 = Pattern.compile("^Homo\\:([0-9]+)$");
 									Matcher mtmp3 = ptmp3.matcher(identifier);
-//									System.out.println(PMID + " check: " + mention + ", identifier: " + identifier);
 									if(mtmp0.find())
 									{
 										String Method_SA = mtmp0.group(1);
@@ -1188,7 +1177,6 @@ public class BioCDoc
 											AnnoInfons.put("NCBI Homologene", GNormPlus.HomologeneID_hash.get(NCBIGeneID));
 										}
 										AnnoInfons.put("NCBI Gene", NCBIGeneID);
-//										System.out.println(PMID + "[1] put NCBI Gene " + NCBIGeneID + " to mention " + mention);
 									}
 									else if(mtmp1.find())
 									{
@@ -1205,7 +1193,6 @@ public class BioCDoc
 											AnnoInfons.put("NCBI Homologene", GNormPlus.HomologeneID_hash.get(NCBIGeneID));
 										}
 										AnnoInfons.put("NCBI Gene", NCBIGeneID);
-//										System.out.println(PMID + "[2] put NCBI Gene " + NCBIGeneID + " to mention " + mention +"; identifier: " + identifier);
 									}
 									else if(mtmp2.find())
 									{
@@ -1283,7 +1270,6 @@ public class BioCDoc
 												}
 											}
 											AnnoInfons.put("NCBI Gene", idSTR);
-//											System.out.println(PMID + "[3] put NCBI Gene " + idSTR + " to mention " + mention);
 
 											String pidSTR="";
 											for(int x=0;x<ProteinidSTR.size();x++)
@@ -1347,29 +1333,16 @@ public class BioCDoc
 						}
 						biocAnnotation.setInfons(AnnoInfons);
 						BioCLocation location = new BioCLocation(start+passage_Offset,last-start);
-						System.out.println("Location: " + mention + " -> " + location);
-//						location.setOffset(start+passage_Offset);
-//						location.setLength(last-start);
 						biocAnnotation.setLocations(Set.of(location));
 						biocAnnotation.setText(mention);
-//						System.out.print("\n"+PMID + " " + annotation_count + " " + mention);
 						biocAnnotation.setID(""+annotation_count);
-						if (annotation_count == 12)
-							System.out.println("12th anno: " + biocAnnotation);
 						annotation_count++;
 						if(Final == true)
 						{
 							// "FamilyName" added by Erik Faessler, JULIE Lab: Output FamilyNames
 							if(AnnoInfons.containsKey("Identifier") || AnnoInfons.containsKey("NCBI Homologene") || AnnoInfons.containsKey("NCBI Gene") || AnnoInfons.containsKey("NCBI Taxonomy") || type.equals("FamilyName"))
 							{
-								System.out.println("Wird geschrieben: " + biocAnnotation);
 								passage_output.addAnnotation(biocAnnotation);
-//								if (mention.equals("MCP-1")) {
-									System.out.println(" output:" + biocAnnotation + " " + AnnoInfons);
-//								}
-							}
-							else {
-								System.out.println(" not output: " + biocAnnotation + " " + AnnoInfons);
 							}
 						}
 						else
