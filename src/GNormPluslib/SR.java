@@ -125,7 +125,7 @@ public class SR
 			        				String mentions_tmp=mention.toLowerCase();
 		    						mentions_tmp=mentions_tmp.replaceAll("[\\W\\-\\_]","");
 		    						mentions_tmp=mentions_tmp.replaceAll("[0-9]","0");
-		    						data.getFiltering_hash().put(mentions_tmp,"");
+		    						GNormPlus.Filtering_hash.put(mentions_tmp,"");
 			        				Mention2ID_lc.put(mention.toLowerCase(), id); //+antibody
 			        				
 			         				String mention_genus = "";
@@ -221,7 +221,7 @@ public class SR
 									String mentions_tmp=mention.toLowerCase();
 		    						mentions_tmp=mentions_tmp.replaceAll("[\\W\\-\\_]","");
 		    						mentions_tmp=mentions_tmp.replaceAll("[0-9]","0");
-		    						data.getFiltering_hash().put(mentions_tmp,"");
+		    						GNormPlus.Filtering_hash.put(mentions_tmp,"");
 			    					IDset.add(id);
 			    					for(int s=start;s<last;s++)
 									{
@@ -291,7 +291,7 @@ public class SR
 							String mentions_tmp=mention.toLowerCase();
     						mentions_tmp=mentions_tmp.replaceAll("[\\W\\-\\_]","");
     						mentions_tmp=mentions_tmp.replaceAll("[0-9]","0");
-    						data.getFiltering_hash().put(mentions_tmp,"");
+    						GNormPlus.Filtering_hash.put(mentions_tmp,"");
 							IDset.add(id);
 							for(int s=Integer.parseInt(start);s<Integer.parseInt(last);s++)
 							{
@@ -361,7 +361,7 @@ public class SR
 								String mentions_tmp=mention.toLowerCase();
 	    						mentions_tmp=mentions_tmp.replaceAll("[\\W\\-\\_]","");
 	    						mentions_tmp=mentions_tmp.replaceAll("[0-9]","0");
-	    						data.getFiltering_hash().put(mentions_tmp,"");
+	    						GNormPlus.Filtering_hash.put(mentions_tmp,"");
 			        			IDset.add(id);
 			        			for(int s=Integer.parseInt(start);s<Integer.parseInt(last);s++)
 								{
@@ -377,9 +377,9 @@ public class SR
 			for(String men : Mention2ID_lc.keySet())
 			{
 				String men_id= Mention2ID_lc.get(men);
-				if(data.getPmidLF2Abb_lc_hash().containsKey(Pmid+"\t"+men))
+				if(GNormPlus.PmidLF2Abb_lc_hash.containsKey(Pmid+"\t"+men))
 				{
-					String Abb = data.getPmidLF2Abb_lc_hash().get(Pmid+"\t"+men);
+					String Abb = GNormPlus.PmidLF2Abb_lc_hash.get(Pmid+"\t"+men);
 					// Abbreviation
 					if(OtherNames.containsKey(men_id))
 					{
@@ -438,7 +438,7 @@ public class SR
 							String mentions_tmp=mention.toLowerCase();
     						mentions_tmp=mentions_tmp.replaceAll("[\\W\\-\\_]","");
     						mentions_tmp=mentions_tmp.replaceAll("[0-9]","0");
-    						data.getFiltering_hash().put(mentions_tmp,"");
+    						GNormPlus.Filtering_hash.put(mentions_tmp,"");
 		        			Mention2ID_lc.put(mention.toLowerCase(), id);
 		        			IDset.add(id);
 		        			for(int s=Integer.parseInt(start);s<Integer.parseInt(last);s++)
@@ -463,9 +463,9 @@ public class SR
 		        		String type = SpAnno[3];
 		        		
 		        		/** Abbreviation solution */
-		    			if(data.getPmidAbb2LF_lc_hash().containsKey(Pmid+"\t"+mention.toLowerCase()) && Mention2ID_lc.containsKey(data.getPmidAbb2LF_lc_hash().containsKey(Pmid+"\t"+mention.toLowerCase())))
+		    			if(GNormPlus.PmidAbb2LF_lc_hash.containsKey(Pmid+"\t"+mention.toLowerCase()) && Mention2ID_lc.containsKey(GNormPlus.PmidAbb2LF_lc_hash.containsKey(Pmid+"\t"+mention.toLowerCase())))
 						{
-							String LF_lc=data.getPmidAbb2LF_lc_hash().get(Pmid+"\t"+mention.toLowerCase());
+							String LF_lc=GNormPlus.PmidAbb2LF_lc_hash.get(Pmid+"\t"+mention.toLowerCase());
 							if(Mention2ID_lc.containsKey(LF_lc))
 							{
 								String LF_ID=Mention2ID_lc.get(LF_lc);
@@ -473,7 +473,7 @@ public class SR
 								String mentions_tmp=mention.toLowerCase();
 	    						mentions_tmp=mentions_tmp.replaceAll("[\\W\\-\\_]","");
 	    						mentions_tmp=mentions_tmp.replaceAll("[0-9]","0");
-	    						data.getFiltering_hash().put(mentions_tmp,"");
+	    						GNormPlus.Filtering_hash.put(mentions_tmp,"");
 							}
 						}
 		    			else if (SpAnno.length>4) 
@@ -500,7 +500,7 @@ public class SR
 										String mentions_tmp=mention.toLowerCase();
 			    						mentions_tmp=mentions_tmp.replaceAll("[\\W\\-\\_]","");
 			    						mentions_tmp=mentions_tmp.replaceAll("[0-9]","0");
-			    						data.getFiltering_hash().put(mentions_tmp,"");
+			    						GNormPlus.Filtering_hash.put(mentions_tmp,"");
 			    						x=1000000;
 			    					}
 		    					}
@@ -533,26 +533,28 @@ public class SR
 		    							}
 			    					}
 		    						if(GNormPlus.taxid4gene.contains(min_id)) // for gene
-				        			{
+		    						{
 		    							min_id="*"+min_id;
-					        		}
+		    						}
 				        			data.getBioCDocobj().Annotations.get(i).get(j).set(a,start+"\t"+last+"\t"+mention+"\tSpecies\t"+min_id);
 									String mentions_tmp=mention.toLowerCase();
 		    						mentions_tmp=mentions_tmp.replaceAll("[\\W\\-\\_]","");
 		    						mentions_tmp=mentions_tmp.replaceAll("[0-9]","0");
-		    						data.getFiltering_hash().put(mentions_tmp,"");
-				        			
-		    					}
+		    						GNormPlus.Filtering_hash.put(mentions_tmp,"");
+				        		}
 		    				}
 		    			}
 					}
 				}
 			}	
 		}
-		data.getBioCDocobj().BioCOutput(Filename,FilenameBioC,data.getBioCDocobj().Annotations,false); //save in BioC file
+		data.getBioCDocobj().BioCOutput(Filename,FilenameBioC,data.getBioCDocobj().Annotations,false,true); //save in BioC file
 	}
 	public void SpeciesAssignment(String Filename,String FilenameBioC) throws IOException, XMLStreamException
 	{
+		data.getBioCDocobj().Annotations = new ArrayList();
+		data.getBioCDocobj().BioCReaderWithAnnotation(Filename);
+		
 		BreakIterator iterator = BreakIterator.getSentenceInstance(Locale.US);	
 		for (int i = 0; i < data.getBioCDocobj().Annotations.size(); i++) /** PMIDs : i */
 		{
@@ -965,39 +967,12 @@ public class SR
 				        			data.getBioCDocobj().Annotations.get(i).get(j).set(k, Annotations_Gene_hash.get(k)+"\tFocus:"+MajorSP);
 			        			}
 							}
-		        			
-		        			/*
-		        			
-		        			//
-		        			// 2. All the mentions are inferred (Too aggressive)
-		        			//
-		        			
-		        			int closed_loca=0;
-							for (int loca_start : Location2Species_hash.keySet())
-		        			{
-								if(loca_start<G_Start)
-								{
-									if(loca_start>closed_loca)
-									{
-										closed_loca=loca_start;
-									}
-								}
-		        			}
-							if(closed_loca>0)
-							{
-								data.getBioCDocobj().Annotations.get(i).get(j).set(k, Annotations_Gene_hash.get(k)+"\tFocus:"+Location2Species_hash.get(closed_loca));
-							}
-							else
-							{
-								data.getBioCDocobj().Annotations.get(i).get(j).set(k, Annotations_Gene_hash.get(k)+"\tFocus:"+MajorSP);
-							}
-							*/
 		        		}
 	    			}
 				}
 			}
 		}
-		data.getBioCDocobj().BioCOutput(Filename,FilenameBioC,data.getBioCDocobj().Annotations,false);
+		data.getBioCDocobj().BioCOutput(Filename,FilenameBioC,data.getBioCDocobj().Annotations,false,true);
 	}
 	public void SpeciesAssignment(String Filename,String FilenameBioC,String FocusSpecies) throws IOException, XMLStreamException
 	{
@@ -1040,6 +1015,6 @@ public class SR
 				}
 			}
 		}
-		data.getBioCDocobj().BioCOutput(Filename,FilenameBioC,data.getBioCDocobj().Annotations,false);
+		data.getBioCDocobj().BioCOutput(Filename,FilenameBioC,data.getBioCDocobj().Annotations,false,true);
 	}
 }

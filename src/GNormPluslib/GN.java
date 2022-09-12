@@ -196,7 +196,7 @@ public class GN
 							}
 							if(mtmp4.find())
 							{
-								mentions=mentions+"|"+mtmp4.group(1)+"a"+mtmp4.group(2);
+								mentions=mentions+"|"+mtmp4.group(1)+"b"+mtmp4.group(2);
 								update=true;
 							}
 							if(mtmp5.find())
@@ -228,7 +228,7 @@ public class GN
 				}
 			}
 		}
-		//data.getBioCDocobj().BioCOutput(Filename,FilenameBioC,data.getBioCDocobj().Annotations,false);
+		//data.getBioCDocobj().BioCOutput(Filename,FilenameBioC,data.getBioCDocobj().Annotations,false,true);
 	}
 	
 	public void ChromosomeRecognition(String Filename,String FilenameBioC) throws IOException, XMLStreamException
@@ -254,12 +254,12 @@ public class GN
 	        		for(int idcount=0;idcount<IDs.length;idcount++)
 	        		{
 	        			//IDs[idcount] = IDs[idcount].replaceAll("\\-[0-9]+", "");
-	        			data.getPmid2ChromosomeGene_hash().put(Pmid+"\t"+IDs[idcount],"");
+	        			GNormPlus.Pmid2ChromosomeGene_hash.put(Pmid+"\t"+IDs[idcount],"");
 	        		}
 				}
 			}
 		}
-		//data.getBioCDocobj().BioCOutput(Filename,FilenameBioC,data.getBioCDocobj().Annotations,false);
+		//data.getBioCDocobj().BioCOutput(Filename,FilenameBioC,data.getBioCDocobj().Annotations,false,true);
 	}
 	
 	public void GeneNormalization(String Filename,String FilenameBioC,boolean GeneIDMatch) throws IOException, XMLStreamException
@@ -271,6 +271,23 @@ public class GN
 		for (int i = 0; i < data.getBioCDocobj().Annotations.size(); i++) /** PMIDs : i */
 		{
 			String Pmid = data.getBioCDocobj().PMIDs.get(i);
+			
+			/** Species */
+			HashMap<String,String> Species_hash = new HashMap<String,String>();
+			for (int j = 0; j < data.getBioCDocobj().Annotations.get(i).size(); j++) /** Paragraphs : j */
+			{
+				for (int k = 0; k < data.getBioCDocobj().Annotations.get(i).get(j).size(); k++) /** Annotation : k */
+				{
+					String anno[] = data.getBioCDocobj().Annotations.get(i).get(j).get(k).split("\t");
+    				String mentions=anno[2];
+					String type=anno[3];
+					if(type.matches("(Species|Genus|Strain|CellLine|Cell)"))
+					{
+						Species_hash.put(mentions,"");
+					}
+				}
+			}
+			
 			
 			/*
 			 * Collect Gene mentions :
@@ -299,6 +316,7 @@ public class GN
 					String mentions=anno[2];
 					String type=anno[3];
 					String taxids="Tax:9606";
+					
 					if(anno.length>=5)
 					{
 						taxids=anno[4];
@@ -307,10 +325,13 @@ public class GN
 					mentions_tmp=mentions_tmp.replaceAll("[\\W\\-\\_]","");
 					mentions_tmp=mentions_tmp.replaceAll("[0-9]","0");
 					taxids=taxids.replaceAll("(Focus|Right|Left|Prefix|Tax):","");
-					
+					if(taxids.equals(""))
+					{
+						taxids="9606";
+					}
 					/** Filtering */
 					boolean found_filter = false;
-					if(data.getFiltering_hash().containsKey(mentions_tmp)) // filtering
+					if(GNormPlus.Filtering_hash.containsKey(mentions_tmp)) // filtering
 					{
 						found_filter=true;
 					}
@@ -327,7 +348,6 @@ public class GN
 								if(tiabs.matches(".*"+lf+".*"))
 								{
 									found_filter=true;
-									System.out.println("Found filter 2");
 									break;
 								}
 							}
@@ -341,6 +361,7 @@ public class GN
 									)
 						{
 							found_filter=true;
+			 
 						}
 					}
 					
@@ -371,6 +392,7 @@ public class GN
 							}
 	    				}
 					}
+					
 				}
 			}
 			
@@ -389,7 +411,7 @@ public class GN
 				String GMs[]=mentions.split("\\|");
 				
 				HashMap<String,String> taxids_hash = new HashMap<String,String>();
-				String taxids_arr[]=taxids.split("\\&");
+				String taxids_arr[]=taxids.split(",");
 				for(int t=0;t<taxids_arr.length;t++)
 				{
 					taxids_hash.put(taxids_arr[t], "");
@@ -400,6 +422,7 @@ public class GN
 					String mention = GMs[ms];
 					String IDstr = GNormPlus.PT_Gene.MentionMatch(mention); /** searched by PT_Gene */
 					String IDs[]=IDstr.split("\\|");
+					
 					/*
 					 * printing the ambiguous gene mentions and candidates
 					 */
@@ -443,7 +466,7 @@ public class GN
 							boolean FoundByChroLoca=false;
 							for(int idcount=0;idcount<ID.length;idcount++)
 							{
-								if(data.getPmid2ChromosomeGene_hash().containsKey(Pmid+"\t"+ID[idcount])) // 3. Chromosome location
+								if(GNormPlus.Pmid2ChromosomeGene_hash.containsKey(Pmid+"\t"+ID[idcount])) // 3. Chromosome location
 								{
 									GuaranteedGene2ID.put(GeneMentionTax,ID[idcount]);
 									FoundByChroLoca=true;
@@ -489,9 +512,9 @@ public class GN
 			for(String GeneMentionTax : GeneMention_hash.keySet())
 			{
 				String MT[] = GeneMentionTax.split("\\t");
-				if(data.getPmidLF2Abb_hash().containsKey(Pmid+"\t"+MT[0]))
+				if(GNormPlus.PmidLF2Abb_hash.containsKey(Pmid+"\t"+MT[0]))
 				{
-					String GeneMentionTax_Abb = data.getPmidLF2Abb_hash().get(Pmid+"\t"+MT[0]) + "\t" + MT[1];
+					String GeneMentionTax_Abb = GNormPlus.PmidLF2Abb_hash.get(Pmid+"\t"+MT[0]) + "\t" + MT[1];
 					if(GeneMention_hash.containsKey(GeneMentionTax_Abb) && GeneMention_hash.get(GeneMentionTax).containsKey("ID"))
 					{
 						GeneMention_hash.get(GeneMentionTax_Abb).put("ID", GeneMention_hash.get(GeneMentionTax).get("ID"));
@@ -520,9 +543,9 @@ public class GN
 						{
 							String MT[] = GeneMentionTax.split("\\t");
 							String LF="";
-							if(data.getPmidAbb2LF_hash().containsKey(Pmid+"\t"+MT[0]))
+							if(GNormPlus.PmidAbb2LF_hash.containsKey(Pmid+"\t"+MT[0]))
 							{
-								LF = data.getPmidAbb2LF_hash().get(Pmid+"\t"+MT[0]);
+								LF = GNormPlus.PmidAbb2LF_hash.get(Pmid+"\t"+MT[0]);
 							}
 							double score = ScoringFunction(geneid[g],Mention_hash,LF);
 							if(score>max_score)
@@ -545,9 +568,9 @@ public class GN
 						{
 							String MT[] = GeneMentionTax.split("\\t");
 							String LF="";
-							if(data.getPmidAbb2LF_hash().containsKey(Pmid+"\t"+MT[0]))
+							if(GNormPlus.PmidAbb2LF_hash.containsKey(Pmid+"\t"+MT[0]))
 							{
-								LF = data.getPmidAbb2LF_hash().get(Pmid+"\t"+MT[0]);
+								LF = GNormPlus.PmidAbb2LF_hash.get(Pmid+"\t"+MT[0]);
 							}
 							double score = ScoringFunction(geneid[g],Mention_hash,LF);
 							String hoge = df.format(score);
@@ -575,9 +598,9 @@ public class GN
 			for(String GeneMentionTax : GeneMention_hash.keySet())
 			{
 				String MT[] = GeneMentionTax.split("\\t");
-				if(data.getPmidAbb2LF_hash().containsKey(Pmid+"\t"+MT[0]))
+				if(GNormPlus.PmidAbb2LF_hash.containsKey(Pmid+"\t"+MT[0]))
 				{
-					String GeneMentionTax_LF = data.getPmidAbb2LF_hash().get(Pmid+"\t"+MT[0]) + "\t" + MT[1];
+					String GeneMentionTax_LF = GNormPlus.PmidAbb2LF_hash.get(Pmid+"\t"+MT[0]) + "\t" + MT[1];
 					if(GeneMention_hash.containsKey(GeneMentionTax_LF) && GeneMention_hash.get(GeneMentionTax).containsKey("ID"))
 					{
 						GeneMention_hash.get(GeneMentionTax_LF).put("ID", GeneMention_hash.get(GeneMentionTax).get("ID"));
@@ -619,7 +642,7 @@ public class GN
 					boolean LongFormExist= true;
 					if(GNormPlus.GeneScoring_hash.containsKey(geneid))
 					{
-						if(data.getPmidAbb2LF_lc_hash().containsKey(Pmid+"\t"+mentions.toLowerCase()))
+						if(GNormPlus.PmidAbb2LF_lc_hash.containsKey(Pmid+"\t"+mentions.toLowerCase()))
 						{
 							/*
 							 * token in lexicon : tkn_lexicon
@@ -634,7 +657,7 @@ public class GN
 								tkn_lexicon.add(Tkn_Freq[0]);
 							}
 							
-							String LF_lc=data.getPmidAbb2LF_lc_hash().get(Pmid+"\t"+mentions.toLowerCase());
+							String LF_lc=GNormPlus.PmidAbb2LF_lc_hash.get(Pmid+"\t"+mentions.toLowerCase());
 							LF_lc = LF_lc.replaceAll("([0-9])([A-Za-z])", "$1 $2");
 							LF_lc = LF_lc.replaceAll("([A-Za-z])([0-9])", "$1 $2");
 							String tkn_mention[] = LF_lc.split("[\\W\\-\\_]");
@@ -656,7 +679,7 @@ public class GN
 					if(LongFormTknMatch == false && LongFormExist == true) // 7.
 					{
 						removeGMT.add(GeneMentionTax); //remove short form
-						removeGMT.add(data.getPmidAbb2LF_hash().get(Pmid+"\t"+mentions)+"\t"+tax); //remove long form
+						removeGMT.add(GNormPlus.PmidAbb2LF_hash.get(Pmid+"\t"+mentions)+"\t"+tax); //remove long form
 					}
 					else if(mentions.length()<=2 && LongFormExist == false) // 8.
 					{
@@ -690,7 +713,7 @@ public class GN
 					
 					if(GeneMention_hash.containsKey(mentions+"\t"+taxids) && GeneMention_hash.get(mentions+"\t"+taxids).containsKey("TargetTax"))
 					{
-						String taxtype=taxid_org.replaceAll(":([0-9\\&]+)","");
+						String taxtype=taxid_org.replaceAll(":([0-9,]+)","");
 						String taxid=GeneMention_hash.get(mentions+"\t"+taxids).get("TargetTax");
 						data.getBioCDocobj().Annotations.get(i).get(j).set(k, start+"\t"+last+"\t"+mentions+"\t"+type+"\t"+taxtype+":"+taxid);
 					}
@@ -899,17 +922,31 @@ public class GN
 					String anno[] = data.getBioCDocobj().Annotations.get(i).get(j).get(k).split("\t");
 					int start = Integer.parseInt(anno[0]);
 					int last = Integer.parseInt(anno[1]);
-					for (int k1 = data.getBioCDocobj().Annotations.get(i).get(j).size()-1; k1 >=0 ; k1--) // Annotation : k
+					String mention = anno[2];
+					String type = anno[3];
+					String id = anno[4];
+					if(type.equals("Gene") && Species_hash.containsKey(mention))
 					{
-						if(k1 != k)
+						data.getBioCDocobj().Annotations.get(i).get(j).remove(k);
+					}
+					else if(type.equals("Gene") && id.equals(""))
+					{
+						data.getBioCDocobj().Annotations.get(i).get(j).remove(k);
+					}
+					else
+					{
+						for (int k1 = data.getBioCDocobj().Annotations.get(i).get(j).size()-1; k1 >=0 ; k1--) // Annotation : k
 						{
-							String anno1[] = data.getBioCDocobj().Annotations.get(i).get(j).get(k1).split("\t");
-							int start1 = Integer.parseInt(anno1[0]);
-							int last1 = Integer.parseInt(anno1[1]);
-							if((start1<start && last1>=last) || (start1<=start && last1>last))
+							if(k1 != k)
 							{
-								data.getBioCDocobj().Annotations.get(i).get(j).remove(k);
-								break;
+								String anno1[] = data.getBioCDocobj().Annotations.get(i).get(j).get(k1).split("\t");
+								int start1 = Integer.parseInt(anno1[0]);
+								int last1 = Integer.parseInt(anno1[1]);
+								if((start1<start && last1>=last) || (start1<=start && last1>last))
+								{
+									data.getBioCDocobj().Annotations.get(i).get(j).remove(k);
+									break;
+								}
 							}
 						}
 					}
@@ -918,11 +955,11 @@ public class GN
 		}
 		if(GeneIDMatch == true)
 		{
-			//data.getBioCDocobj().BioCOutput(Filename,FilenameBioC,data.getBioCDocobj().Annotations,false);
+			//data.getBioCDocobj().BioCOutput(Filename,FilenameBioC,data.getBioCDocobj().Annotations,false,true);
 		}
 		else
 		{
-			data.getBioCDocobj().BioCOutput(Filename,FilenameBioC,data.getBioCDocobj().Annotations,true);
+			data.getBioCDocobj().BioCOutput(Filename,FilenameBioC,data.getBioCDocobj().Annotations,true,true);
 		}
 	}
 	/*
@@ -1043,6 +1080,6 @@ public class GN
 				}
 			}
 		}
-		data.getBioCDocobj().BioCOutput(Filename,FilenameBioC,data.getBioCDocobj().Annotations,true);
+		data.getBioCDocobj().BioCOutput(Filename,FilenameBioC,data.getBioCDocobj().Annotations,true,true);
 	}
 }

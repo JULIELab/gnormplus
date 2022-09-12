@@ -166,12 +166,12 @@ public class SimConcept
 							
 							//For Abbreviation
 							HashMap <Integer,String> AbbLFStatus_hash = new HashMap <Integer,String>();
-							for(String Pmid_LF : data.getPmidLF2Abb_hash().keySet())
+							for(String Pmid_LF : GNormPlus.PmidLF2Abb_hash.keySet())
 							{
 								String pf[] = Pmid_LF.split("\\t",-1);
 								if(pf[0].equals(Pmid))
 								{
-									String Abb = data.getPmidLF2Abb_hash().get(Pmid_LF);
+									String Abb = GNormPlus.PmidLF2Abb_hash.get(Pmid_LF);
 									String LF = pf[1];
 									
 									Abb = Abb.replaceAll("([0-9])([A-Za-z])", "$1 $2");
@@ -484,12 +484,12 @@ public class SimConcept
 								
 								//For Abbreviation
 								HashMap <Integer,String> AbbLFStatus_hash = new HashMap <Integer,String>();
-								for(String Pmid_LF : data.getPmidLF2Abb_hash().keySet())
+								for(String Pmid_LF : GNormPlus.PmidLF2Abb_hash.keySet())
 								{
 									String pf[] = Pmid_LF.split("\\t",-1);
 									if(pf[0].equals(Pmid))
 									{
-										String Abb = data.getPmidLF2Abb_hash().get(Pmid_LF);
+										String Abb = GNormPlus.PmidLF2Abb_hash.get(Pmid_LF);
 										String LF = pf[1];
 										
 										Abb = Abb.replaceAll("([0-9])([A-Za-z])", "$1 $2");
@@ -852,11 +852,11 @@ public class SimConcept
 					 *  AWXWOA
 					 * 
 					 */
-					for (String PmidAbb : data.getPmidAbb2LF_hash().keySet())
+					for (String PmidAbb : GNormPlus.PmidAbb2LF_hash.keySet())
 					{
 						String PmidAbbs[]=PmidAbb.split("\\t",-1);
 						String Abb = PmidAbbs[1];
-						String LF = data.getPmidAbb2LF_hash().get(PmidAbb);
+						String LF = GNormPlus.PmidAbb2LF_hash.get(PmidAbb);
 
 						Abb = Abb.replaceAll("([0-9])([A-Za-z])", "$1 $2");
 						Abb = Abb.replaceAll("([A-Za-z])([0-9])", "$1 $2");
@@ -1518,6 +1518,6 @@ public class SimConcept
 			}
 		}
 		*/
-		data.getBioCDocobj().BioCOutput(Filename,FilenameBioC,data.getBioCDocobj().Annotations,false);
+		data.getBioCDocobj().BioCOutput(Filename,FilenameBioC,data.getBioCDocobj().Annotations,false,true);
 	}
 }
