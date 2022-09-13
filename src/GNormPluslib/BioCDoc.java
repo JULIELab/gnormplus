@@ -660,9 +660,9 @@ public class BioCDoc {
 					int last = start + Anno.getTotalLocation().getLength();
 					String AnnoMention = Anno.getText().get();
 					String Annotype = Anno.getInfon("type").get();
-					String Annoid = Anno.getInfon("Identifier").get();
+					String Annoid = Anno.getInfon("Identifier").orElse(null);
 					if (Annoid == null) {
-						Annoid = Anno.getInfon("Identifier").get();
+						Annoid = Anno.getInfon("Identifier").orElse(null);
 					}
 					if (Annoid == null || Annoid.equals("null")) {
 						AnnotationInPassage.add(start + "\t" + last + "\t" + AnnoMention + "\t" + Annotype);

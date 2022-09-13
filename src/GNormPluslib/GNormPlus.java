@@ -36,7 +36,7 @@ public class GNormPlus
 	public static HashMap<String, String> PmidLF2Abb_hash = new HashMap<String, String>();
 	public static HashMap<String, String> Pmid2ChromosomeGene_hash = new HashMap<String, String>();
 	public static HashMap<String, String> SimConceptMention2Type_hash = new HashMap<String, String>();
-	public static HashMap<String, String> Filtering_hash = new HashMap<String, String>();
+	private static HashMap<String, String> Filtering_hash = new HashMap<String, String>();
 	public static HashMap<String, String> Filtering_WithLongForm_hash = new HashMap<String, String>();
 	public static HashMap<String, String> SP_Virus2Human_hash = new HashMap<String, String>();
 	public static HashMap<String, String> GeneWithoutSPPrefix_hash = new HashMap<String, String>();
@@ -135,7 +135,7 @@ public class GNormPlus
 		}
 	}
 
-	private static void processFile(String inputFilePath, String InputFile, String outputFilePath, double startTime, String TrainTest) throws IOException, XMLStreamException {
+	public static void processFile(String inputFilePath, String InputFile, String outputFilePath, double startTime, String TrainTest) throws IOException, XMLStreamException {
 		double totTime;
 		BufferedReader br;
 		String line;
@@ -145,9 +145,9 @@ public class GNormPlus
 		String path="tmp";
 		File file = new File(path);
 		File[] files = file.listFiles();
-		for (File ftmp:files) 
+		for (File ftmp:files)
 		{
-			if (ftmp.isFile() && ftmp.exists()) 
+			if (ftmp.isFile() && ftmp.exists())
 			{
 				if(ftmp.toString().matches("tmp/"+ InputFile +".*"))
 				{
@@ -202,7 +202,6 @@ public class GNormPlus
 		SimConcept SCobj = new SimConcept(data);
 		GN GNobj = new GN(data);
 		String FinalStep="";
-
 		/** SpeciesRecognition */
 		if(setup_hash.containsKey("SpeciesRecognition")  && setup_hash.get("SpeciesRecognition").toLowerCase().equals("true") ) // pre-annotated name entities
 		{
@@ -674,7 +673,7 @@ public class GNormPlus
 		return TrainTest;
 	}
 
-	public static void loadConfiguration(FileInputStream setupFileStream, String FocusSpecies) throws IOException {
+	public static void loadConfiguration(InputStream setupFileStream, String FocusSpecies) throws IOException {
 		BufferedReader br = new BufferedReader(new InputStreamReader(setupFileStream, "UTF-8"));
 		String line="";
 		Pattern ptmp = Pattern.compile("^	([A-Za-z0-9]+) = ([^ \\t\\n\\r]+)$");

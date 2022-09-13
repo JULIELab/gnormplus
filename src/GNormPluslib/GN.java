@@ -331,7 +331,7 @@ public class GN
 					}
 					/** Filtering */
 					boolean found_filter = false;
-					if(GNormPlus.Filtering_hash.containsKey(mentions_tmp)) // filtering
+					if(data.getFiltering_hash().containsKey(mentions_tmp)) // filtering
 					{
 						found_filter=true;
 					}
