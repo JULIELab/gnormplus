@@ -29,12 +29,6 @@ public class GNormPlus
 	public static HashMap<String, String> HomologeneID_hash = new HashMap<String, String>();
 	public static HashMap<String,String> SuffixTranslationMap_hash = new HashMap<String,String>();
 	public static HashMap<String,String> SuffixTranslationMap2_hash = new HashMap<String,String>();
-	public static HashMap<String, String> Pmid2Abb_hash = new HashMap<String, String>();
-	public static HashMap<String, String> PmidAbb2LF_lc_hash = new HashMap<String, String>();
-	public static HashMap<String, String> PmidLF2Abb_lc_hash = new HashMap<String, String>();
-	public static HashMap<String, String> PmidAbb2LF_hash = new HashMap<String, String>();
-	public static HashMap<String, String> PmidLF2Abb_hash = new HashMap<String, String>();
-	public static HashMap<String, String> Pmid2ChromosomeGene_hash = new HashMap<String, String>();
 	public static HashMap<String, String> SimConceptMention2Type_hash = new HashMap<String, String>();
 	private static HashMap<String, String> Filtering_hash = new HashMap<String, String>();
 	public static HashMap<String, String> Filtering_WithLongForm_hash = new HashMap<String, String>();
@@ -175,7 +169,7 @@ public class GNormPlus
 			System.exit(0);
 		}
 
-		System.out.print(inputFilePath +" - ("+Format+" format) : Processing ... \r");
+//		System.out.print(inputFilePath +" - ("+Format+" format) : Processing ... \r");
 
 		/** PubTator2BioC*/
 		if(Format.equals("PubTator"))
@@ -326,7 +320,7 @@ public class GNormPlus
 		 */
 		if((!setup_hash.containsKey("DeleteTmp")) || setup_hash.get("DeleteTmp").toLowerCase().equals("true"))
 		{
-			path="tmp"; 
+			path="tmp";
 			file = new File(path);
 			files = file.listFiles(); 
 			for (File ftmp:files) 
@@ -346,7 +340,7 @@ public class GNormPlus
 		 */
 		endTime = System.currentTimeMillis();
 		totTime = endTime - startTime;
-		System.out.println(inputFilePath +" - ("+Format+" format) : Processing Time:"+totTime/1000+"sec");
+//		System.out.println(inputFilePath +" - ("+Format+" format) : Processing Time:"+totTime/1000+"sec");
 	}
 
 	public static String loadResources(String FocusSpecies, double startTime) throws IOException {

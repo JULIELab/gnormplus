@@ -254,7 +254,7 @@ public class GN
 	        		for(int idcount=0;idcount<IDs.length;idcount++)
 	        		{
 	        			//IDs[idcount] = IDs[idcount].replaceAll("\\-[0-9]+", "");
-	        			GNormPlus.Pmid2ChromosomeGene_hash.put(Pmid+"\t"+IDs[idcount],"");
+	        			data.getPmid2ChromosomeGene_hash().put(Pmid+"\t"+IDs[idcount],"");
 	        		}
 				}
 			}
@@ -466,7 +466,7 @@ public class GN
 							boolean FoundByChroLoca=false;
 							for(int idcount=0;idcount<ID.length;idcount++)
 							{
-								if(GNormPlus.Pmid2ChromosomeGene_hash.containsKey(Pmid+"\t"+ID[idcount])) // 3. Chromosome location
+								if(data.getPmid2ChromosomeGene_hash().containsKey(Pmid+"\t"+ID[idcount])) // 3. Chromosome location
 								{
 									GuaranteedGene2ID.put(GeneMentionTax,ID[idcount]);
 									FoundByChroLoca=true;
@@ -512,9 +512,9 @@ public class GN
 			for(String GeneMentionTax : GeneMention_hash.keySet())
 			{
 				String MT[] = GeneMentionTax.split("\\t");
-				if(GNormPlus.PmidLF2Abb_hash.containsKey(Pmid+"\t"+MT[0]))
+				if(data.getPmidLF2Abb_hash().containsKey(Pmid+"\t"+MT[0]))
 				{
-					String GeneMentionTax_Abb = GNormPlus.PmidLF2Abb_hash.get(Pmid+"\t"+MT[0]) + "\t" + MT[1];
+					String GeneMentionTax_Abb = data.getPmidLF2Abb_hash().get(Pmid+"\t"+MT[0]) + "\t" + MT[1];
 					if(GeneMention_hash.containsKey(GeneMentionTax_Abb) && GeneMention_hash.get(GeneMentionTax).containsKey("ID"))
 					{
 						GeneMention_hash.get(GeneMentionTax_Abb).put("ID", GeneMention_hash.get(GeneMentionTax).get("ID"));
@@ -543,9 +543,9 @@ public class GN
 						{
 							String MT[] = GeneMentionTax.split("\\t");
 							String LF="";
-							if(GNormPlus.PmidAbb2LF_hash.containsKey(Pmid+"\t"+MT[0]))
+							if(data.getPmidAbb2LF_hash().containsKey(Pmid+"\t"+MT[0]))
 							{
-								LF = GNormPlus.PmidAbb2LF_hash.get(Pmid+"\t"+MT[0]);
+								LF = data.getPmidAbb2LF_hash().get(Pmid+"\t"+MT[0]);
 							}
 							double score = ScoringFunction(geneid[g],Mention_hash,LF);
 							if(score>max_score)
@@ -568,9 +568,9 @@ public class GN
 						{
 							String MT[] = GeneMentionTax.split("\\t");
 							String LF="";
-							if(GNormPlus.PmidAbb2LF_hash.containsKey(Pmid+"\t"+MT[0]))
+							if(data.getPmidAbb2LF_hash().containsKey(Pmid+"\t"+MT[0]))
 							{
-								LF = GNormPlus.PmidAbb2LF_hash.get(Pmid+"\t"+MT[0]);
+								LF = data.getPmidAbb2LF_hash().get(Pmid+"\t"+MT[0]);
 							}
 							double score = ScoringFunction(geneid[g],Mention_hash,LF);
 							String hoge = df.format(score);
@@ -598,9 +598,9 @@ public class GN
 			for(String GeneMentionTax : GeneMention_hash.keySet())
 			{
 				String MT[] = GeneMentionTax.split("\\t");
-				if(GNormPlus.PmidAbb2LF_hash.containsKey(Pmid+"\t"+MT[0]))
+				if(data.getPmidAbb2LF_hash().containsKey(Pmid+"\t"+MT[0]))
 				{
-					String GeneMentionTax_LF = GNormPlus.PmidAbb2LF_hash.get(Pmid+"\t"+MT[0]) + "\t" + MT[1];
+					String GeneMentionTax_LF = data.getPmidAbb2LF_hash().get(Pmid+"\t"+MT[0]) + "\t" + MT[1];
 					if(GeneMention_hash.containsKey(GeneMentionTax_LF) && GeneMention_hash.get(GeneMentionTax).containsKey("ID"))
 					{
 						GeneMention_hash.get(GeneMentionTax_LF).put("ID", GeneMention_hash.get(GeneMentionTax).get("ID"));
@@ -642,7 +642,7 @@ public class GN
 					boolean LongFormExist= true;
 					if(GNormPlus.GeneScoring_hash.containsKey(geneid))
 					{
-						if(GNormPlus.PmidAbb2LF_lc_hash.containsKey(Pmid+"\t"+mentions.toLowerCase()))
+						if(data.getPmidAbb2LF_lc_hash().containsKey(Pmid+"\t"+mentions.toLowerCase()))
 						{
 							/*
 							 * token in lexicon : tkn_lexicon
@@ -657,7 +657,7 @@ public class GN
 								tkn_lexicon.add(Tkn_Freq[0]);
 							}
 							
-							String LF_lc=GNormPlus.PmidAbb2LF_lc_hash.get(Pmid+"\t"+mentions.toLowerCase());
+							String LF_lc=data.getPmidAbb2LF_lc_hash().get(Pmid+"\t"+mentions.toLowerCase());
 							LF_lc = LF_lc.replaceAll("([0-9])([A-Za-z])", "$1 $2");
 							LF_lc = LF_lc.replaceAll("([A-Za-z])([0-9])", "$1 $2");
 							String tkn_mention[] = LF_lc.split("[\\W\\-\\_]");
@@ -679,7 +679,7 @@ public class GN
 					if(LongFormTknMatch == false && LongFormExist == true) // 7.
 					{
 						removeGMT.add(GeneMentionTax); //remove short form
-						removeGMT.add(GNormPlus.PmidAbb2LF_hash.get(Pmid+"\t"+mentions)+"\t"+tax); //remove long form
+						removeGMT.add(data.getPmidAbb2LF_hash().get(Pmid+"\t"+mentions)+"\t"+tax); //remove long form
 					}
 					else if(mentions.length()<=2 && LongFormExist == false) // 8.
 					{
