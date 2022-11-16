@@ -821,6 +821,8 @@ public class BioCDoc {
 								Anno[4] = Anno[5];
 							}
 						}
+						if (Anno.length < 4)
+							throw new IllegalStateException("Document with ID " + PMID + " has annotation \"" + Arrays.toString(Anno) + "\" which is too short: A minimal length of 4 is expected.");
 						String type = Anno[3];
 						if (type.equals("GeneID")) {
 							type = "Gene";

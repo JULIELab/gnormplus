@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+"""
+This script was used to change the code of the BioCDoc class in order to use the
+"""
 import re
 
 def normalize(s):

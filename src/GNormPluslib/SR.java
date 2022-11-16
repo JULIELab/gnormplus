@@ -68,24 +68,28 @@ public class SR
 	        		// For anti-serum filtering
 	        		String ForwardSTR="";
 	        		String BackwardSTR="";
-	        		if(start>21)
-	        		{
-	        			ForwardSTR = (PassageContext+"ZZZZZZZZZZZZZZZZZZZZZZZZZZZ").substring(start-21,last);
-	        		}
-	        		else
-	        		{
-	        			ForwardSTR = (PassageContext+"ZZZZZZZZZZZZZZZZZZZZZZZZZZZ").substring(0,last);
-	        		}
-	        		if(PassageContext.length()>last+21)
-	        		{
-	        			BackwardSTR = PassageContext.substring(start,last+21);
-	        		}
-	        		else
-	        		{
-	        			BackwardSTR = PassageContext.substring(start,PassageContext.length());
-	        		}
-	        			        		
-	        		String mention = anno[2];
+					try {
+						if(start>21)
+						{
+							ForwardSTR = (PassageContext+"ZZZZZZZZZZZZZZZZZZZZZZZZZZZ").substring(start-21,last);
+						}
+						else
+						{
+							ForwardSTR = (PassageContext+"ZZZZZZZZZZZZZZZZZZZZZZZZZZZ").substring(0,last);
+						}
+						if(PassageContext.length()>last+21)
+						{
+							BackwardSTR = PassageContext.substring(start,last+21);
+						}
+						else
+						{
+							BackwardSTR = PassageContext.substring(start,PassageContext.length());
+						}
+					} catch (Exception e) {
+						throw new RuntimeException("Exception in document " + Pmid + " in paragraph with offset " + data.getBioCDocobj().PassageOffsets.get(i).get(j) + " and length " + PassageContext.length() + " beginning with " + PassageContext.substring(0, Math.min(PassageContext.length(), 80)), e);
+					}
+
+					String mention = anno[2];
 	        		String id = anno[3];
 	        		String mention_tmp=mention.toLowerCase();
 	        		mention_tmp = mention_tmp.replaceAll("([^A-Za-z0-9@ ])", "\\\\$1");
@@ -166,6 +170,10 @@ public class SR
 					String anno[]=locations.get(k).split("\t");
 					int start= Integer.parseInt(anno[0]);
 	        		int last= Integer.parseInt(anno[1]);
+					if (last > PassageContext.length()) {
+						// Erik Faessler: We had offset issues with texts that contain non-ASCII characters
+						continue;
+					}
 	        		String mention = anno[2];
 	        		String id = anno[3];
 	        		if(data.getBioCDocobj().Annotations.size()>i && data.getBioCDocobj().Annotations.get(i).size()>j)
@@ -804,6 +812,8 @@ public class SR
 		        		String G_mentions = anno[2];
 		        		String G_type = anno[3];
 		        		String G_mention_list[]=G_mentions.split("\\|");
+						if (G_mention_list.length == 0)
+							throw new IllegalStateException("There is no gene mention but at least one was expected in document with ID " +  data.getBioCDocobj().PMIDs.get(i) + " in paragraph with offset " + data.getBioCDocobj().PassageOffsets.get(i).get(j) + " and length " + PassageContext.length() + " beginning with " + PassageContext.substring(0, Math.min(PassageContext.length(), 80)));
 		        		String G_mention=G_mention_list[0]; // only use the first term to detect species ; should be updated after SimConcept
 		        		
 		        		/** 1. prefix */

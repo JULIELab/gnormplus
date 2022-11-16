@@ -10,7 +10,7 @@ GNormPlus has been developed at the NLM and is described in [1] and can be downl
 
 ## Code changes to output FamilyNames
 
-There are two places in the code marked with a comment containing "Erik Faessler". The added conditions lead to the output of the FamilyName entities. Those entities do not receive an ID from NCBI Gene.
+There are a few places in the code marked with a comment containing "Erik Faessler". Two of those changes  lead to the output of the FamilyName entities. Those entities do not receive an ID from NCBI Gene.
 
 ## Refactoring to allow multi-threaded processing
 
