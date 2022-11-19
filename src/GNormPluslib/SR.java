@@ -560,7 +560,10 @@ public class SR
 	}
 	public void SpeciesAssignment(String Filename,String FilenameBioC) throws IOException, XMLStreamException
 	{
-		data.getBioCDocobj().Annotations = new ArrayList();
+		// When we only reset the annotations, GN#GeneIDRecognition fails because the PMIDs are added anyway
+		// and then there are more PMIDs than annotations.
+//		data.getBioCDocobj().Annotations = new ArrayList();
+		data.resetBioCDocobj();
 		data.getBioCDocobj().BioCReaderWithAnnotation(Filename);
 		
 		BreakIterator iterator = BreakIterator.getSentenceInstance(Locale.US);	

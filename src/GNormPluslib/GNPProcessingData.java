@@ -50,4 +50,8 @@ public class GNPProcessingData {
     public BioCDoc getBioCDocobj() {
         return BioCDocobj;
     }
+
+    public void resetBioCDocobj() {
+        BioCDocobj = new BioCDoc();
+    }
 }
