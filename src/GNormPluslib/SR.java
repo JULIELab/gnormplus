@@ -563,6 +563,7 @@ public class SR
 		// When we only reset the annotations, GN#GeneIDRecognition fails because the PMIDs are added anyway
 		// and then there are more PMIDs than annotations.
 //		data.getBioCDocobj().Annotations = new ArrayList();
+//		data.getBioCDocobj().PMIDs = new ArrayList();
 		data.resetBioCDocobj();
 		data.getBioCDocobj().BioCReaderWithAnnotation(Filename);
 		

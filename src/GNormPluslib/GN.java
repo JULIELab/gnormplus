@@ -912,23 +912,7 @@ public class GN {
                     String mention = anno[2].toLowerCase();
                     mention = mention.replaceAll("[\\W\\-\\_]+", "");
                     if (GNormPlus.GeneIDs_hash.containsKey(mention)) {
-                        try {
-                            data.getBioCDocobj().Annotations.get(i).get(j).add(locations.get(k) + "\tGeneID:" + GNormPlus.GeneIDs_hash.get(mention)); //paragraph
-                        } catch (Exception e) {
-                            System.out.println("i: " + i);
-                            System.out.println("j: " + j);
-                            System.out.println("Number of PMIDs: " + data.getBioCDocobj().PMIDs.size());
-                            System.out.println("Number of annotation lists: " + data.getBioCDocobj().Annotations.size());
-//                            final String pmid = i < data.getBioCDocobj().PMIDs.size() ? data.getBioCDocobj().PMIDs.get(i) : "i too large: i=" + i + ", data.getBioCDocobj().PMIDs.size()=" + data.getBioCDocobj().PMIDs.size();
-//                            System.out.println("PMID: " + pmid);
-//                            System.out.println("data.getBioCDocobj().Annotations.size(): " + data.getBioCDocobj().Annotations.size());
-//                            if (i < data.getBioCDocobj().Annotations.size()) {
-//                                System.out.println("data.getBioCDocobj().Annotations.get(i).size(): " + data.getBioCDocobj().Annotations.get(i).size());
-//                            } else {
-//                                System.out.println("i too large: i=" + i + ", data.getBioCDocobj().Annotations.size()=" + data.getBioCDocobj().Annotations.size());
-//                            }
-                            System.out.println("[GNormPlus:GN#GeneIDRecognition] Warning: Skipping GeneIDMatch for document number " + i + " with ID " + data.getBioCDocobj().PMIDs.get(i) + " because of an internal consistency issue");
-                        }
+                        data.getBioCDocobj().Annotations.get(i).get(j).add(locations.get(k) + "\tGeneID:" + GNormPlus.GeneIDs_hash.get(mention)); //paragraph
                     }
                 }
             }

@@ -299,7 +299,7 @@ public class BioCDoc {
 								}
 							}
 						} else {
-							Annoid = annotation.getInfon("Identifier").get();
+							Annoid = annotation.getInfon("Identifier").orElse(null);
 						}
 					} else if (Annotype.equals("Species") || Annotype.equals("Genus") || Annotype.equals("Strain")) {
 						if (annotation.getInfons().containsKey("NCBI Taxonomy")) {
@@ -563,7 +563,6 @@ public class BioCDoc {
 			PassageOffsets.add(PassageOffset);
 			Annotations.add(AnnotationInPMID);
 		}
-		System.out.println("[BioCReader] PMCIDs.size(): " + PMIDs.size() + ", " + PMIDs);
 	}
 
 	public void BioCReaderWithAnnotation(String input) throws IOException, XMLStreamException {
@@ -678,8 +677,6 @@ public class BioCDoc {
 			PassageOffsets.add(PassageOffset);
 			Annotations.add(AnnotationInPMID);
 		}
-		System.out.println("[BioCReaderWithAnnotation] PMCIDs.size(): " + PMIDs.size()+ ", " + PMIDs + "; Annotations: " + Annotations.size());
-
 	}
 
 	public void BioCOutput(String input, String output, ArrayList<ArrayList<ArrayList<String>>> Annotations, boolean Final, boolean RemovePreviousAnno) throws IOException, XMLStreamException {
