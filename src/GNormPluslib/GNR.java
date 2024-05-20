@@ -7,10 +7,13 @@ package GNormPluslib;
 
 import java.io.*;
 import java.util.*;
+import java.util.concurrent.Exchanger;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.xml.stream.XMLStreamException;
 
+import com.ctc.wstx.io.WstxInputSource;
 import org.tartarus.snowball.SnowballStemmer;
 import org.tartarus.snowball.ext.englishStemmer;
 
@@ -170,8 +173,45 @@ public class GNR
 	    	cmd ="./Ab3P "+FilenameAbb+" "+FilenameAbb+".out";
 	    	//cmd ="java -jar bioadi.jar "+FilenameAbb+" > "+FilenameAbb+".out";
 	    }
-	    
-    	Process process = runtime.exec(cmd);
+
+		// We let the command run in its own thread. Then we can use process.waitFor() to set a timeout.
+		// We do this because in rare cases, the Ab3P program seems to run forever.
+		final String finalCmd = cmd;
+		final Process process = runtime.exec(finalCmd);
+		Thread t = new Thread("GNP Ab3P Runner") {
+			@Override
+			public void run() {
+				super.run();
+				try {
+					System.out.println("Starting to find abbreviations with command " + finalCmd);
+					InputStream is = process.getInputStream();
+					InputStreamReader isr = new InputStreamReader(is, "UTF-8");
+					BufferedReader br = new BufferedReader(isr);
+					String line="";
+					while ( (line = br.readLine()) != null)
+					{
+						fr.write(line);
+						fr.newLine();
+						fr.flush();
+					}
+					is.close();
+					isr.close();
+					br.close();
+					fr.close();
+
+				} catch (IOException e) {
+					System.err.println("Error in Thread to run cmd " + finalCmd);
+					e.printStackTrace();
+				}
+			}
+		};
+		t.start();
+		try {
+			process.waitFor(10, TimeUnit.MINUTES);
+		} catch (InterruptedException e) {
+			System.err.println("Command " + finalCmd + " was interrupted because it took too long.");
+		}
+		/*Process process = runtime.exec(cmd);
     	InputStream is = process.getInputStream();
     	InputStreamReader isr = new InputStreamReader(is, "UTF-8");
     	BufferedReader br = new BufferedReader(isr);
@@ -185,7 +225,7 @@ public class GNR
 	    is.close();
 	    isr.close();
 	    br.close();
-	    fr.close();
+	    fr.close();*/
 	    //Abb output -> Hash
 		BufferedReader inputfile = new BufferedReader(new InputStreamReader(new FileInputStream(FilenameAbb+".out"), "UTF-8"));
 		line="";

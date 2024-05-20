@@ -816,8 +816,11 @@ public class SR
 		        		String G_mentions = anno[2];
 		        		String G_type = anno[3];
 		        		String G_mention_list[]=G_mentions.split("\\|");
-						if (G_mention_list.length == 0)
-							throw new IllegalStateException("There is no gene mention but at least one was expected in document with ID " +  data.getBioCDocobj().PMIDs.get(i) + " in paragraph with offset " + data.getBioCDocobj().PassageOffsets.get(i).get(j) + " and length " + PassageContext.length() + " beginning with " + PassageContext.substring(0, Math.min(PassageContext.length(), 80)));
+						if (G_mention_list.length == 0) {
+							InconsistentDataException e = new InconsistentDataException("There is no gene mention but at least one was expected in document with ID " + data.getBioCDocobj().PMIDs.get(i) + " in paragraph with offset " + data.getBioCDocobj().PassageOffsets.get(i).get(j) + " and length " + PassageContext.length() + " beginning with " + PassageContext.substring(0, Math.min(PassageContext.length(), 80)));
+							e.setDocId(data.getBioCDocobj().PMIDs.get(i));
+							throw e;
+						}
 		        		String G_mention=G_mention_list[0]; // only use the first term to detect species ; should be updated after SimConcept
 		        		
 		        		/** 1. prefix */
