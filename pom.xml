@@ -5,7 +5,7 @@
     <groupId>de.julielab</groupId>
     <artifactId>julielab-gnormplus</artifactId>
     <packaging>jar</packaging>
-    <version>1.0.2</version>
+    <version>1.0.3</version>
     <name>JULIE Lab GNormPlus</name>
     <url>https://www.ncbi.nlm.nih.gov/research/bionlp/Tools/gnormplus/</url>
 

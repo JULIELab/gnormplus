@@ -183,7 +183,6 @@ public class GNR
 			public void run() {
 				super.run();
 				try {
-					System.out.println("Starting to find abbreviations with command " + finalCmd);
 					InputStream is = process.getInputStream();
 					InputStreamReader isr = new InputStreamReader(is, "UTF-8");
 					BufferedReader br = new BufferedReader(isr);
